@@ -179,12 +179,12 @@ async function cargarUsuario(uid, cuenta, contenido, token) {
     const prenda = PRENDAS.find((p) => p.name === nombre);
     const ref = userRef.collection("garments").doc();
     const photoUrl = await subirFoto(uid, ref.id, prenda.url);
-    const doc = {
-      id: ref.id, name: prenda.name, category: prenda.category, color: prenda.color, photoUrl,
+    const datos = {
+      name: prenda.name, category: prenda.category, color: prenda.color, photoUrl,
       favorite: i % 4 === 0, createdAt: ahora - (nombres.length - i) * 3600_000,
     };
-    await ref.set(doc);
-    prendas.push(doc);
+    await ref.set(datos);
+    prendas.push({ id: ref.id, ...datos });
   }
 
   // Outfits: dos armados a mano y uno propuesto por el asesor
@@ -202,7 +202,7 @@ async function cargarUsuario(uid, cuenta, contenido, token) {
   ];
   for (const [i, outfit] of manuales.entries()) {
     const ref = userRef.collection("outfits").doc();
-    await ref.set({ id: ref.id, ...outfit, itemsText: [], why: "", origin: "manual", createdAt: ahora - (2 - i) * dia });
+    await ref.set({ ...outfit, itemsText: [], why: "", origin: "manual", createdAt: ahora - (2 - i) * dia });
   }
   const propuesto = {
     title: "Cómodo y ordenado",
@@ -211,18 +211,18 @@ async function cargarUsuario(uid, cuenta, contenido, token) {
   };
   const outfitAsesor = userRef.collection("outfits").doc();
   await outfitAsesor.set({
-    id: outfitAsesor.id, name: propuesto.title, occasion: faker.helpers.arrayElement(OCASIONES_OUTFIT),
+    name: propuesto.title, occasion: faker.helpers.arrayElement(OCASIONES_OUTFIT),
     garmentIds: [], itemsText: propuesto.items, why: propuesto.why, origin: "asesor", favorite: false, createdAt: ahora - dia,
   });
 
   // Conversación con el asesor (sin llamar al modelo: es texto de ejemplo)
   const conversacion = userRef.collection("conversations").doc();
-  await conversacion.set({ id: conversacion.id, title: "¿Qué me pongo para la semana?", updatedAt: ahora - dia });
+  await conversacion.set({ title: "¿Qué me pongo para la semana?", updatedAt: ahora - dia });
   const pregunta = conversacion.collection("messages").doc();
-  await pregunta.set({ id: pregunta.id, role: "user", text: "¿Qué me pongo para la semana?", outfits: [], followUpQuestion: null, createdAt: ahora - dia - 60_000 });
+  await pregunta.set({ role: "user", text: "¿Qué me pongo para la semana?", outfits: [], followUpQuestion: null, createdAt: ahora - dia - 60_000 });
   const respuesta = conversacion.collection("messages").doc();
   await respuesta.set({
-    id: respuesta.id, role: "assistant", text: `${cuenta.name}, con lo que ya tienes puedes armar esto:`,
+    role: "assistant", text: `${cuenta.name}, con lo que ya tienes puedes armar esto:`,
     outfits: [propuesto], followUpQuestion: null, createdAt: ahora - dia,
   });
 

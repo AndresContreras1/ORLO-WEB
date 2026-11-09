@@ -42,12 +42,14 @@ Los valores hexadecimales de las paletas de piel, cabello y ojos son los de `Opc
 |---|---|---|
 | `results/{id}` | `Resultado` | Historial del cuestionario. Al guardar uno se actualiza también `currentResult` (en un batch) |
 | `lessonProgress/{lessonId}` | `lessonId` (number), `status`, `updatedAt` | `status`: `sin_empezar`, `en_curso`, `completada`. El id del documento es el id de la lección |
-| `garments/{id}` | `id`, `name` (≤ 40), `category`, `color`, `photoUrl` (opcional), `createdAt`, `favorite` (bool, opcional) | Ver códigos abajo. Foto en `garmentImages/{uid}/{id}.jpg` |
-| `outfits/{id}` | `id`, `name` (≤ 40), `occasion`, `garmentIds` (lista), `itemsText` (lista), `why`, `origin`, `favorite` (bool), `createdAt` | `occasion`: `universidad`, `trabajo`, `salida`, `otra`. `origin`: `asesor` o `manual` |
-| `conversations/{id}` | `id`, `title`, `updatedAt` | Conversaciones del asesor |
-| `conversations/{id}/messages/{id}` | `id`, `role`, `text`, `outfits` (`[{title, items, why}]`), `followUpQuestion` (opcional), `createdAt` | `role`: `user` o `assistant`. Al agregar un mensaje se actualiza `updatedAt` de la conversación |
+| `garments/{id}` | `name` (≤ 40), `category`, `color`, `photoUrl` (opcional), `createdAt`, `favorite` (bool, opcional) | Ver códigos abajo. Foto en `garmentImages/{uid}/{id}.jpg` |
+| `outfits/{id}` | `name` (≤ 40), `occasion`, `garmentIds` (lista), `itemsText` (lista), `why`, `origin`, `favorite` (bool), `createdAt` | `occasion`: `universidad`, `trabajo`, `salida`, `otra`. `origin`: `asesor` o `manual` |
+| `conversations/{id}` | `title`, `updatedAt` | Conversaciones del asesor |
+| `conversations/{id}/messages/{id}` | `role`, `text`, `outfits` (`[{title, items, why}]`), `followUpQuestion` (opcional), `createdAt` | `role`: `user` o `assistant`. Al agregar un mensaje se actualiza `updatedAt` de la conversación |
 | `saved/{itemId}` | `itemId` (number), `name`, `imageUrl`, `category`, `savedAt` | Guardados de Explora. El id del documento es el id de la prenda del catálogo |
 | `dailyOutfits/{AAAA-MM-DD}` | `title`, `items` (lista), `why`, `createdAt` | Outfit del día. El id es la fecha local |
+
+En `garments`, `outfits`, `conversations` y `messages` el id es el del documento: no se guarda como campo. Al leer se toma `doc.id` (en Angular, `idField: 'id'`).
 
 ### Códigos de prendas
 
@@ -83,7 +85,7 @@ Todas las rutas de la app llevan `Authorization: Bearer <ID token de Firebase>`.
 
 | Método y ruta | Qué hace |
 |---|---|
-| `GET /api/v1/me` · `DELETE /api/v1/me` | Premium y mensajes restantes · eliminar la cuenta |
+| `GET /api/v1/me` · `DELETE /api/v1/me` | Premium y mensajes restantes · eliminar la cuenta (responde 200 `{"deleted": true}`) |
 | `GET /api/v1/styles` | Estilos con paleta y galería |
 | `GET /api/v1/quiz/active` · `POST /api/v1/quiz/score` | Cuestionario y puntaje |
 | `GET /api/v1/lessons` · `GET /api/v1/lessons/{id}` | Lecciones |
