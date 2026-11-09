@@ -1,0 +1,102 @@
+<div class="mb-4">
+  <a routerLink="/admin/quiz" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Cuestionario</a>
+  <h1 class="page-title mt-1">{{ esEdicion ? 'Editar pregunta' : 'Nueva pregunta' }}</h1>
+</div>
+
+<app-load-state [loading]="cargando()" [error]="errorCarga()" (retry)="cargar()" />
+
+@if (!cargando() && !errorCarga()) {
+  <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="card border-0 mb-3">
+      <div class="card-body p-4 row g-3">
+        <div class="col-12 col-lg-9">
+          <label class="form-label" for="text">Pregunta</label>
+          <input id="text" class="form-control" formControlName="text" placeholder="¿Qué prendas usas más en la semana?"
+                 [class.is-invalid]="form.controls.text.touched && form.controls.text.invalid">
+          <app-field-error [control]="form.controls.text" />
+        </div>
+        <div class="col-6 col-lg-3">
+          <label class="form-label" for="order">Orden</label>
+          <input id="order" type="number" min="1" class="form-control" formControlName="order"
+                 [class.is-invalid]="form.controls.order.touched && form.controls.order.invalid">
+          <app-field-error [control]="form.controls.order" />
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="helpText">Ayuda (opcional)</label>
+          <input id="helpText" class="form-control" formControlName="helpText" placeholder="Puedes elegir varias">
+        </div>
+        <div class="col-12 d-flex flex-wrap gap-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="multiple" formControlName="multiple">
+            <label class="form-check-label" for="multiple">Se pueden elegir varias opciones</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="active" formControlName="active">
+            <label class="form-check-label" for="active">Visible en la app</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 mb-3">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <h2 class="h6 mb-0">Opciones y tabla de puntos</h2>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="agregarOpcion()" [disabled]="opciones.length >= 8">
+            <i class="bi bi-plus-lg me-1"></i>Opción
+          </button>
+        </div>
+        <p class="form-text mt-0 mb-3">Puntos de 0 a 10 por estilo. Deja en 0 los estilos a los que la opción no suma.</p>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle points-table">
+            <thead>
+              <tr>
+                <th class="option-col">Opción</th>
+                @for (estilo of estilos(); track estilo.id) {
+                  <th class="text-center small">{{ estilo.name }}</th>
+                }
+                <th></th>
+              </tr>
+            </thead>
+            <tbody formArrayName="options">
+              @for (opcion of opciones.controls; track opcion; let i = $index) {
+                <tr [formGroupName]="i">
+                  <td class="option-col">
+                    <input class="form-control form-control-sm mb-1" formControlName="text" placeholder="Texto de la opción"
+                           [class.is-invalid]="opcion.controls.text.touched && opcion.controls.text.invalid">
+                    <input class="form-control form-control-sm" formControlName="imageUrl" placeholder="URL de la imagen (opcional)">
+                  </td>
+                  @for (estilo of estilos(); track estilo.id) {
+                    <td class="text-center" formGroupName="scores">
+                      <input type="number" min="0" max="10" class="form-control form-control-sm text-center points-input"
+                             [formControlName]="estilo.id.toString()" [attr.aria-label]="'Puntos para ' + estilo.name"
+                             [class.is-invalid]="opcion.controls.scores.get(estilo.id.toString())?.invalid">
+                    </td>
+                  }
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="quitarOpcion(i)"
+                            [disabled]="opciones.length <= 2" aria-label="Quitar opción"><i class="bi bi-x-lg"></i></button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (opciones.length < 2) {
+          <div class="invalid-feedback d-block">Cada pregunta necesita al menos 2 opciones.</div>
+        }
+      </div>
+    </div>
+
+    @if (errorGuardar()) {
+      <div class="alert alert-danger">{{ errorGuardar() }}</div>
+    }
+    <div class="d-flex justify-content-end gap-2">
+      <a routerLink="/admin/quiz" class="btn btn-outline-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary" id="btnGuardar" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+}

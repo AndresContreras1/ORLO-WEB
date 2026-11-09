@@ -1,0 +1,66 @@
+<div class="mb-4">
+  <h1 class="page-title">Asesor IA</h1>
+  <p class="text-secondary small mb-0">
+    Estas instrucciones se envían al modelo en cada conversación, junto con el perfil y el armario de la persona.
+    Los cambios aplican desde el siguiente mensaje.
+  </p>
+</div>
+
+<app-load-state [loading]="cargando()" [error]="errorCarga()" (retry)="cargar()" />
+
+@if (!cargando() && !errorCarga()) {
+  <form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="row g-3">
+    <div class="col-12 col-xl-8">
+      <div class="card border-0 h-100">
+        <div class="card-body p-4">
+          <label class="form-label" for="systemPrompt">Instrucciones y tono</label>
+          <textarea id="systemPrompt" rows="18" class="form-control font-monospace small" formControlName="systemPrompt"
+                    [class.is-invalid]="form.controls.systemPrompt.touched && form.controls.systemPrompt.invalid"></textarea>
+          <div class="form-text">{{ form.controls.systemPrompt.value.length }} / 8000 caracteres</div>
+          <app-field-error [control]="form.controls.systemPrompt" />
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="card border-0">
+        <div class="card-body p-4 row g-3">
+          <div class="col-12">
+            <label class="form-label" for="model">Modelo</label>
+            <select id="model" class="form-select" formControlName="model">
+              @for (m of modelos; track m.id) {
+                <option [value]="m.id">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="dailyLimit">Mensajes por día</label>
+            <input id="dailyLimit" type="number" min="1" max="500" class="form-control" formControlName="dailyLimit"
+                   [class.is-invalid]="form.controls.dailyLimit.touched && form.controls.dailyLimit.invalid">
+            <app-field-error [control]="form.controls.dailyLimit" />
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="maxOutputTokens">Largo máximo</label>
+            <input id="maxOutputTokens" type="number" min="300" max="4000" class="form-control" formControlName="maxOutputTokens"
+                   [class.is-invalid]="form.controls.maxOutputTokens.touched && form.controls.maxOutputTokens.invalid">
+            <app-field-error [control]="form.controls.maxOutputTokens" />
+          </div>
+          <div class="col-12 small text-secondary">
+            El límite diario es por usuario premium. Revisa el costo acumulado en el Resumen antes de subirlo.
+          </div>
+        </div>
+      </div>
+
+      @if (errorGuardar()) {
+        <div class="alert alert-danger mt-3">{{ errorGuardar() }}</div>
+      }
+      @if (guardado()) {
+        <div class="alert alert-success mt-3" id="msgGuardado">Cambios guardados.</div>
+      }
+      <div class="d-flex justify-content-end mt-3">
+        <button type="submit" class="btn btn-primary" id="btnGuardar" [disabled]="guardando() || form.pristine">
+          {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </form>
+}

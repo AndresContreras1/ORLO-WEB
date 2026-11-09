@@ -1,0 +1,84 @@
+@import "../../../styles/theme";
+
+$topbar-height: 3.75rem;
+$sidebar-width: 15rem;
+
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: $topbar-height;
+  background: $orlo-surface;
+  border-bottom: 1px solid $orlo-border;
+  z-index: 30;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: $orlo-text;
+  letter-spacing: .02em;
+
+  span {
+    color: $orlo-accent;
+    font-weight: 500;
+    font-size: .95rem;
+  }
+}
+
+.sidebar {
+  position: fixed;
+  top: $topbar-height;
+  bottom: 0;
+  left: 0;
+  width: $sidebar-width;
+  background: $orlo-surface;
+  border-right: 1px solid $orlo-border;
+  overflow-y: auto;
+  z-index: 20;
+  transition: transform .2s ease;
+}
+
+.nav-link {
+  color: $orlo-muted;
+  border-radius: $border-radius-sm;
+  padding: .55rem .75rem;
+  font-weight: 500;
+
+  &:hover {
+    color: $orlo-text;
+    background: $orlo-bg;
+  }
+
+  &.active {
+    color: darken($orlo-accent, 10%);
+    background: $orlo-accent-soft;
+  }
+}
+
+.content {
+  margin-top: $topbar-height;
+  margin-left: $sidebar-width;
+  min-height: calc(100vh - #{$topbar-height});
+}
+
+.backdrop {
+  position: fixed;
+  inset: $topbar-height 0 0 0;
+  background: rgba(43, 43, 46, .3);
+  z-index: 15;
+}
+
+// En el celular el menú se oculta y se abre con el botón
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  .content {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,36 @@
+<div class="admin-shell">
+  <header class="topbar d-flex align-items-center justify-content-between px-3 px-lg-4">
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-link text-body d-lg-none p-1" (click)="alternarMenu()"
+              aria-label="Abrir menú" id="btnMenu">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <a routerLink="/admin/dashboard" class="brand text-decoration-none">ORLO <span>panel</span></a>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-secondary small d-none d-sm-inline">{{ correo }}</span>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="salir()" id="btnSalir">
+        <i class="bi bi-box-arrow-right me-1"></i>Salir
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar" [class.open]="menuAbierto()">
+    <nav class="nav flex-column p-3 gap-1">
+      @for (item of items; track item.route) {
+        <a class="nav-link d-flex align-items-center gap-2" [routerLink]="item.route" routerLinkActive="active"
+           (click)="cerrarMenu()">
+          <i class="bi {{ item.icon }}"></i>{{ item.label }}
+        </a>
+      }
+    </nav>
+  </aside>
+
+  @if (menuAbierto()) {
+    <div class="backdrop d-lg-none" (click)="cerrarMenu()"></div>
+  }
+
+  <main class="content p-3 p-lg-4">
+    <router-outlet />
+  </main>
+</div>

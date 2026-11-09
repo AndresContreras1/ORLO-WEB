@@ -1,0 +1,46 @@
+// ============================================================
+// Tema de ORLO. Para cambiar el diseño se editan estas variables:
+// van ANTES de importar Bootstrap, así todo el sitio las usa.
+// ============================================================
+
+// Un solo color de acento, vivo pero suave, para botones y detalles
+$orlo-accent: #E8736C;
+$orlo-accent-soft: #FCEDEB;
+
+// Fondo claro neutro y texto legible
+$orlo-bg: #FAF8F6;
+$orlo-surface: #FFFFFF;
+$orlo-text: #2B2B2E;
+$orlo-muted: #6E6A70;
+$orlo-border: #ECE7E3;
+
+// Bootstrap
+$primary: $orlo-accent;
+$secondary: #8C8790;
+$success: #3F9D74;
+$danger: #D9534F;
+$warning: #E9A23B;
+$info: #4C8DAE;
+$light: $orlo-bg;
+$dark: $orlo-text;
+
+$body-bg: $orlo-bg;
+$body-color: $orlo-text;
+$border-color: $orlo-border;
+$link-color: darken($orlo-accent, 12%);
+
+// Una sola familia sans-serif, redondeada y legible
+$font-family-sans-serif: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-size-base: 1rem;
+$headings-font-weight: 700;
+
+// Bordes redondeados y sombras suaves
+$border-radius: .75rem;
+$border-radius-sm: .5rem;
+$border-radius-lg: 1.25rem;
+$border-radius-pill: 50rem;
+$enable-shadows: false;
+$box-shadow-sm: 0 1px 2px rgba(43, 43, 46, .06);
+$card-border-color: $orlo-border;
+$input-border-color: $orlo-border;
+$btn-font-weight: 600;

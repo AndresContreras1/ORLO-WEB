@@ -1,0 +1,62 @@
+<div class="mb-4">
+  <a routerLink="/admin/stores" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Tiendas</a>
+  <h1 class="page-title mt-1">{{ esEdicion ? 'Editar tienda' : 'Nueva tienda' }}</h1>
+</div>
+
+<app-load-state [loading]="cargando()" [error]="errorCarga()" (retry)="cargar()" />
+
+@if (!cargando() && !errorCarga()) {
+  <div class="row">
+    <div class="col-12 col-lg-8 col-xl-6">
+      <form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="card border-0">
+        <div class="card-body p-4 row g-3">
+          <div class="col-12">
+            <label class="form-label" for="name">Nombre</label>
+            <input id="name" class="form-control" formControlName="name"
+                   [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+            <app-field-error [control]="form.controls.name" />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="garmentTypes">Tipo de prendas</label>
+            <input id="garmentTypes" class="form-control" formControlName="garmentTypes" placeholder="Básicos, jeans y camisetas"
+                   [class.is-invalid]="form.controls.garmentTypes.touched && form.controls.garmentTypes.invalid">
+            <app-field-error [control]="form.controls.garmentTypes" />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="url">Enlace</label>
+            <input id="url" class="form-control" formControlName="url" placeholder="https://"
+                   [class.is-invalid]="form.controls.url.touched && form.controls.url.invalid">
+            @if (form.controls.url.touched && form.controls.url.errors?.['pattern']) {
+              <div class="invalid-feedback d-block">El enlace debe empezar por http:// o https://</div>
+            } @else {
+              <app-field-error [control]="form.controls.url" />
+            }
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="logoUrl">Logo (URL, opcional)</label>
+            <input id="logoUrl" class="form-control" formControlName="logoUrl">
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="active" formControlName="active">
+              <label class="form-check-label" for="active">Activa (se muestra en la app)</label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="affiliate" formControlName="affiliate">
+              <label class="form-check-label" for="affiliate">Enlace de afiliado (la app lo indica al usuario)</label>
+            </div>
+          </div>
+          @if (errorGuardar()) {
+            <div class="col-12"><div class="alert alert-danger mb-0">{{ errorGuardar() }}</div></div>
+          }
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <a routerLink="/admin/stores" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" id="btnGuardar" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando…' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}

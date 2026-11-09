@@ -1,0 +1,66 @@
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title">Cuestionario</h1>
+    <p class="text-secondary small mb-0">
+      Cada opción suma puntos a uno o varios estilos. El estilo con más puntos es el principal y el segundo, el secundario.
+    </p>
+  </div>
+  <a routerLink="/admin/quiz/new" class="btn btn-primary" id="btnNuevaPregunta"><i class="bi bi-plus-lg me-1"></i>Nueva pregunta</a>
+</div>
+
+@if (errorAccion()) {
+  <div class="alert alert-warning d-flex justify-content-between align-items-center">
+    {{ errorAccion() }}
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="errorAccion.set(null)"></button>
+  </div>
+}
+
+<app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+@if (!cargando() && !error()) {
+  <div class="d-flex flex-column gap-3">
+    @for (pregunta of preguntas(); track pregunta.id) {
+      <div class="card border-0">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+            <div>
+              <span class="badge text-bg-light border me-2">{{ pregunta.order }}</span>
+              <strong>{{ pregunta.text }}</strong>
+              @if (pregunta.multiple) {
+                <span class="badge bg-accent-soft text-accent ms-2">Varias opciones</span>
+              }
+              @if (!pregunta.active) {
+                <span class="badge text-bg-secondary ms-2">Oculta</span>
+              }
+            </div>
+            <div class="d-flex gap-2">
+              <a [routerLink]="['/admin/quiz', pregunta.id]" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-pencil me-1"></i>Editar
+              </a>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="aBorrar.set(pregunta)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+          <ul class="list-unstyled small mb-0 row g-1">
+            @for (opcion of pregunta.options; track opcion.id) {
+              <li class="col-12 col-md-6 d-flex gap-2 align-items-center">
+                @if (opcion.imageUrl) {
+                  <img [src]="opcion.imageUrl" alt="" class="thumb" style="width:2rem;height:2rem">
+                }
+                <span>{{ opcion.text }}</span>
+                <span class="text-secondary">— {{ resumenPuntos(opcion.scores) }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    } @empty {
+      <p class="text-secondary">Todavía no hay preguntas.</p>
+    }
+  </div>
+}
+
+<app-confirm-dialog [open]="aBorrar() !== null" [busy]="borrando()" heading="Borrar pregunta"
+                    message="Se borrará la pregunta con sus opciones y puntos. Esta acción no se puede deshacer."
+                    (confirmed)="confirmarBorrado()" (cancelled)="cerrarDialogo()" />
