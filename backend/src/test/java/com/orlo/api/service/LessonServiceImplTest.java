@@ -1,22 +1,28 @@
 package com.orlo.api.service;
 
 import com.orlo.api.dto.LessonDetailDto;
+import com.orlo.api.dto.admin.LessonRequest;
 import com.orlo.api.entities.Lesson;
 import com.orlo.api.exception.NotFoundException;
 import com.orlo.api.exception.PremiumRequiredException;
 import com.orlo.api.repository.LessonRepository;
+import com.orlo.api.service.LessonPublishedEvent;
 import com.orlo.api.service.impl.LessonServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +30,8 @@ class LessonServiceImplTest {
 
     @Mock
     private LessonRepository lessonRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private LessonServiceImpl lessonService;
@@ -60,6 +68,32 @@ class LessonServiceImplTest {
         when(lessonRepository.findByIdAndPublishedTrue(9L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> lessonService.detail(9L, true)).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void update_hiddenToPublished_publishesEvent() {
+        Lesson hidden = lesson(3L, false);
+        hidden.setPublished(false);
+        when(lessonRepository.findById(3L)).thenReturn(Optional.of(hidden));
+
+        lessonService.update(3L, request(true));
+
+        verify(eventPublisher).publishEvent(new LessonPublishedEvent(3L, "Nueva"));
+    }
+
+    @Test
+    void update_alreadyPublished_doesNotPublishAgain() {
+        Lesson published = lesson(3L, false);
+        when(lessonRepository.findById(3L)).thenReturn(Optional.of(published));
+
+        lessonService.update(3L, request(true));
+
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    private static LessonRequest request(boolean published) {
+        return new LessonRequest("Nueva", "Resumen", "Idea", "Consejo", 1, 4, null, false, false, published,
+                null, List.of(), null, List.of());
     }
 
     private static Lesson lesson(Long id, boolean free) {

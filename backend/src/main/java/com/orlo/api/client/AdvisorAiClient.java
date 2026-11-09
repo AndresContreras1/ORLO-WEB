@@ -7,6 +7,9 @@ public interface AdvisorAiClient {
 
     AiAnswer ask(AiQuestion question);
 
+    /** Un solo outfit para hoy (outfit del día). */
+    DailyAnswer dailyOutfit(AiQuestion question);
+
     record AiTurn(boolean fromUser, String text) {
     }
 
@@ -18,5 +21,8 @@ public interface AdvisorAiClient {
 
     record AiAnswer(String reply, List<AiOutfit> outfits, String followUpQuestion,
                     long inputTokens, long outputTokens) {
+    }
+
+    record DailyAnswer(AiOutfit outfit, long inputTokens, long outputTokens) {
     }
 }

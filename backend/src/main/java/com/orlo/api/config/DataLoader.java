@@ -2,6 +2,8 @@ package com.orlo.api.config;
 
 import com.orlo.api.entities.AdminUser;
 import com.orlo.api.entities.AiConfig;
+import com.orlo.api.entities.CombineIdea;
+import com.orlo.api.entities.ExploreItem;
 import com.orlo.api.entities.Lesson;
 import com.orlo.api.entities.LessonExample;
 import com.orlo.api.entities.QuizOption;
@@ -11,6 +13,7 @@ import com.orlo.api.entities.Store;
 import com.orlo.api.entities.Style;
 import com.orlo.api.repository.AdminUserRepository;
 import com.orlo.api.repository.AiConfigRepository;
+import com.orlo.api.repository.ExploreItemRepository;
 import com.orlo.api.repository.LessonRepository;
 import com.orlo.api.repository.QuizQuestionRepository;
 import com.orlo.api.repository.RoleRepository;
@@ -27,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 /**
  * Datos iniciales. Cada bloque solo se carga si su tabla está vacía, así que se puede
@@ -45,6 +48,7 @@ public class DataLoader implements CommandLineRunner {
     private final QuizQuestionRepository questionRepository;
     private final LessonRepository lessonRepository;
     private final StoreRepository storeRepository;
+    private final ExploreItemRepository exploreItemRepository;
     private final AiConfigRepository aiConfigRepository;
     private final AdminUserRepository adminUserRepository;
     private final RoleRepository roleRepository;
@@ -54,6 +58,7 @@ public class DataLoader implements CommandLineRunner {
 
     public DataLoader(StyleRepository styleRepository, QuizQuestionRepository questionRepository,
                       LessonRepository lessonRepository, StoreRepository storeRepository,
+                      ExploreItemRepository exploreItemRepository,
                       AiConfigRepository aiConfigRepository, AdminUserRepository adminUserRepository,
                       RoleRepository roleRepository, PasswordEncoder passwordEncoder,
                       @Value("${app.admin.email}") String adminEmail,
@@ -62,6 +67,7 @@ public class DataLoader implements CommandLineRunner {
         this.questionRepository = questionRepository;
         this.lessonRepository = lessonRepository;
         this.storeRepository = storeRepository;
+        this.exploreItemRepository = exploreItemRepository;
         this.aiConfigRepository = aiConfigRepository;
         this.adminUserRepository = adminUserRepository;
         this.roleRepository = roleRepository;
@@ -79,6 +85,7 @@ public class DataLoader implements CommandLineRunner {
         seedQuiz(styles);
         seedLessons();
         seedStores();
+        seedExplore();
     }
 
     private void seedAdmin() {
@@ -143,8 +150,13 @@ public class DataLoader implements CommandLineRunner {
         return byCode;
     }
 
+    /** La galería de cada estilo son las prendas reales de ejemplo de ese estilo. */
     private static Style style(String code, String name, String description, String... palette) {
-        List<String> gallery = IntStream.rangeClosed(1, 10).mapToObj(i -> image("estilo-" + code + "-" + i)).toList();
+        List<String> gallery = CatalogoDeEjemplo.PRENDAS.stream()
+                .filter(p -> p.styles().contains(code))
+                .map(CatalogoDeEjemplo.Prenda::imageUrl)
+                .limit(10)
+                .toList();
         return new Style(code, name, description, List.of(palette), gallery);
     }
 
@@ -214,7 +226,9 @@ public class DataLoader implements CommandLineRunner {
         QuizQuestion q = new QuizQuestion(text, help, multiple, position);
         int i = 1;
         for (OptionSeed seed : options) {
-            QuizOption option = new QuizOption(seed.text(), image("pregunta-" + position + "-" + i), i);
+            String clave = CatalogoDeEjemplo.FOTO_OPCION.get(seed.text());
+            String foto = clave == null ? null : CatalogoDeEjemplo.porClave(clave).imageUrl();
+            QuizOption option = new QuizOption(seed.text(), foto, i);
             for (String score : seed.scores()) {
                 String[] parts = score.split(":");
                 option.addScore(styles.get(parts[0]), Integer.parseInt(parts[1]));
@@ -272,7 +286,8 @@ public class DataLoader implements CommandLineRunner {
         lesson.setTip(tip);
         lesson.setPosition(position);
         lesson.setMinutes(4);
-        lesson.setCoverUrl(image("leccion-" + position));
+        List<String> fotos = FOTOS_LECCION.get(position);
+        lesson.setCoverUrl(foto(fotos.get(0)));
         lesson.setFreeSample(free);
         lesson.setUsesColorProfile(usesColorProfile);
         lesson.setPublished(true);
@@ -281,7 +296,7 @@ public class DataLoader implements CommandLineRunner {
         lesson.setReviewCorrectIndex(correct);
         List<LessonExample> list = new ArrayList<>();
         for (int i = 0; i < examples.length; i++) {
-            list.add(new LessonExample(image("leccion-" + position + "-ejemplo-" + (i + 1)), examples[i], i + 1));
+            list.add(new LessonExample(foto(fotos.get(i + 1)), examples[i], i + 1));
         }
         lesson.replaceExamples(list);
         return lesson;
@@ -292,15 +307,54 @@ public class DataLoader implements CommandLineRunner {
             return;
         }
         storeRepository.saveAll(List.of(
-                new Store("Koaj", null, "Básicos, jeans y camisetas", "https://www.koaj.co"),
-                new Store("Arturo Calle", null, "Camisas, pantalones y trajes", "https://www.arturocalle.com"),
-                new Store("Studio F", null, "Vestidos, blusas y jeans", "https://www.studiof.com.co"),
-                new Store("Tennis", null, "Ropa casual y urbana", "https://www.tennis.com.co"),
-                new Store("Falabella", null, "Ropa, calzado y accesorios de varias marcas", "https://www.falabella.com.co")));
+                store("Koaj", "Básicos, jeans y camisetas", "https://www.koaj.co", "arriba", "abajo", "abrigo"),
+                store("Arturo Calle", "Camisas, pantalones y trajes", "https://www.arturocalle.com", "arriba", "abajo", "abrigo", "calzado"),
+                store("Studio F", "Vestidos, blusas y jeans", "https://www.studiof.com.co", "arriba", "abajo", "otro", "accesorio"),
+                store("Tennis", "Ropa casual y urbana", "https://www.tennis.com.co", "arriba", "abajo", "abrigo", "accesorio"),
+                store("Falabella", "Ropa, calzado y accesorios de varias marcas", "https://www.falabella.com.co",
+                        "arriba", "abajo", "abrigo", "calzado", "accesorio", "otro")));
     }
 
-    /** Imagen de ejemplo estable mientras los fundadores cargan las fotos reales desde el panel. */
-    private static String image(String seed) {
-        return "https://picsum.photos/seed/orlo-" + seed + "/600/800";
+    private static Store store(String name, String types, String url, String... categories) {
+        Store store = new Store(name, null, types, url);
+        store.setCategories(new HashSet<>(List.of(categories)));
+        return store;
+    }
+
+    /** Catálogo de Explora con las prendas reales de ejemplo. */
+    private void seedExplore() {
+        if (exploreItemRepository.count() > 0) {
+            return;
+        }
+        List<ExploreItem> items = new ArrayList<>();
+        for (CatalogoDeEjemplo.Prenda p : CatalogoDeEjemplo.PRENDAS) {
+            ExploreItem item = new ExploreItem();
+            item.setName(p.name());
+            item.setImageUrl(p.imageUrl());
+            item.setImageCredit(p.credit());
+            item.setCategory(p.category());
+            item.setColor(p.color());
+            item.setStyles(new HashSet<>(p.styles()));
+            item.setWhyItFits(p.why());
+            item.setTrend(p.trend());
+            item.setAccessory(p.accessory());
+            item.setCombineIdeas(new ArrayList<>(p.ideas().stream()
+                    .map(i -> new CombineIdea(i.context(), i.items())).toList()));
+            items.add(item);
+        }
+        exploreItemRepository.saveAll(items);
+    }
+
+    /** Portada y fotos de los ejemplos de cada lección (claves del catálogo de ejemplo). */
+    private static final Map<Integer, List<String>> FOTOS_LECCION = Map.of(
+            1, List.of("vestido_verde", "camiseta_morada", "jean_azul_oscuro", "chaqueta_motociclista"),
+            2, List.of("blazer_azul", "falda_campana", "chaqueta_algodon", "camisa_cuadros_roja"),
+            3, List.of("jean_azul_oscuro", "jean_azul_oscuro", "blusa_blanca", "henley_gris"),
+            4, List.of("camiseta_roja", "bolso_celeste", "camisa_cuadros_verde", "vestido_gris"),
+            5, List.of("reloj_cuero", "tenis_blancos_clasicos", "blazer_azul", "aretes_hoja"),
+            6, List.of("vestido_rojo", "bolso_cafe", "camiseta_azul_ml", "blusa_blanca"));
+
+    private static String foto(String clave) {
+        return CatalogoDeEjemplo.porClave(clave).imageUrl();
     }
 }

@@ -35,6 +35,9 @@ public class AiUsage {
     @Column(nullable = false)
     private int messages;
 
+    @Column(name = "daily_outfits", nullable = false)
+    private int dailyOutfits;
+
     @Column(name = "input_tokens", nullable = false)
     private long inputTokens;
 

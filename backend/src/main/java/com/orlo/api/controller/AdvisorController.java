@@ -2,6 +2,8 @@ package com.orlo.api.controller;
 
 import com.orlo.api.dto.AdvisorMessageRequest;
 import com.orlo.api.dto.AdvisorReplyDto;
+import com.orlo.api.dto.DailyOutfitDto;
+import com.orlo.api.dto.DailyOutfitRequest;
 import com.orlo.api.security.AppPrincipal;
 import com.orlo.api.service.AdvisorService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,5 +34,12 @@ public class AdvisorController {
     public AdvisorReplyDto ask(@Parameter(hidden = true) @AuthenticationPrincipal AppPrincipal principal,
                                @Valid @RequestBody AdvisorMessageRequest request) {
         return advisorService.ask(principal, request);
+    }
+
+    @PostMapping("/daily-outfit")
+    @Operation(summary = "Outfit del día con las prendas del armario. No descuenta mensajes; 429 LIMIT_REACHED al pasar su tope diario")
+    public DailyOutfitDto dailyOutfit(@Parameter(hidden = true) @AuthenticationPrincipal AppPrincipal principal,
+                                      @Valid @RequestBody DailyOutfitRequest request) {
+        return advisorService.dailyOutfit(principal, request);
     }
 }

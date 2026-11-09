@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -53,13 +52,13 @@ class AdvisorServiceImplTest {
     @Mock
     private AdvisorAiClient aiClient;
 
-    @InjectMocks
     private AdvisorServiceImpl advisorService;
 
     private AdvisorMessageRequest request;
 
     @BeforeEach
     void setUp() {
+        advisorService = new AdvisorServiceImpl(appUserService, usageService, aiConfigService, aiClient, 3);
         request = new AdvisorMessageRequest("¿Qué me pongo para la universidad?", QuickAction.MORE_CASUAL,
                 new AdvisorProfile("Ana María Pérez", "18-24", "femenino", "Urbano", "Creativo", null, null, null,
                         "Cálido", null, List.of("Estudio")),
@@ -120,6 +119,35 @@ class AdvisorServiceImplTest {
         assertThat(question.getValue().systemPrompt())
                 .contains("Reglas de ORLO", "Nombre: Ana\n", "Jean azul", "Estudio")
                 .doesNotContain("Pérez", "ana@correo.co");
+    }
+
+    @Test
+    void dailyOutfit_premium_countsOutfitNotMessagesAndRecordsTokens() {
+        when(appUserService.registerVisit(PRINCIPAL)).thenReturn(true);
+        when(aiConfigService.get()).thenReturn(CONFIG);
+        when(aiClient.dailyOutfit(any())).thenReturn(new AdvisorAiClient.DailyAnswer(
+                new AiOutfit("Fresco y simple", List.of("Jean azul", "Camiseta blanca"), "Va con el calor"), 500, 120));
+
+        var outfit = advisorService.dailyOutfit(PRINCIPAL,
+                new com.orlo.api.dto.DailyOutfitRequest(request.profile(), request.wardrobe()));
+
+        assertThat(outfit.title()).isEqualTo("Fresco y simple");
+        verify(usageService).reserveDailyOutfit("uid-1", 3);
+        verify(usageService, never()).reserve(anyString(), org.mockito.ArgumentMatchers.anyInt());
+        verify(usageService).recordTokens("uid-1", "claude-haiku-5-5", 500, 120);
+        ArgumentCaptor<AiQuestion> question = ArgumentCaptor.forClass(AiQuestion.class);
+        verify(aiClient).dailyOutfit(question.capture());
+        assertThat(question.getValue().systemPrompt()).contains("Outfit del día", "Jean azul");
+    }
+
+    @Test
+    void dailyOutfit_notPremium_throwsPremiumRequired() {
+        when(appUserService.registerVisit(PRINCIPAL)).thenReturn(false);
+
+        assertThatThrownBy(() -> advisorService.dailyOutfit(PRINCIPAL,
+                new com.orlo.api.dto.DailyOutfitRequest(request.profile(), List.of())))
+                .isInstanceOf(PremiumRequiredException.class);
+        verify(aiClient, never()).dailyOutfit(any());
     }
 
     @Test
