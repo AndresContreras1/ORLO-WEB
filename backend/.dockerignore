@@ -1,0 +1,6 @@
+target/
+.env
+*.mv.db
+postman/
+compose.yaml
+README.md

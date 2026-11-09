@@ -20,7 +20,9 @@ import { ARMARIOS, PRENDAS } from "./prendas.js";
 
 const DESTINO = process.env.ORLO_SEED_DESTINO ?? "emulador";
 const PROYECTO = process.env.ORLO_FIREBASE_PROJECT_ID ?? "demo-orlo";
-const BUCKET = process.env.ORLO_STORAGE_BUCKET ?? `${PROYECTO}.appspot.com`;
+// Los proyectos nuevos de Firebase usan <id>.firebasestorage.app; el emulador, <id>.appspot.com
+const BUCKET = process.env.ORLO_STORAGE_BUCKET
+  ?? (DESTINO === "emulador" ? `${PROYECTO}.appspot.com` : `${PROYECTO}.firebasestorage.app`);
 const API = process.env.ORLO_API_URL ?? "http://localhost:8090/api/v1";
 const PASSWORD = process.env.ORLO_SEED_PASSWORD ?? "Prueba2026";
 const EXTRA = Number(process.env.ORLO_SEED_USUARIOS ?? 4);

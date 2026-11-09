@@ -1,0 +1,80 @@
+# Blueprint de Render: crea la API, la web y la base de datos de ORLO en un solo paso.
+# Nada se despliega solo (autoDeployTrigger: off): después de cada cambio se usa "Manual Deploy" en el panel.
+# Guía completa en docs/despliegue-render.md.
+
+services:
+  # API Spring Boot (backend/Dockerfile)
+  - type: web
+    name: orlo-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    autoDeployTrigger: "off"
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Render la entrega como postgresql://...; docker-entrypoint.sh la pasa a JDBC
+      - key: DATABASE_URL
+        fromDatabase:
+          name: orlo-db
+          property: connectionString
+      - key: DB_USER
+        fromDatabase:
+          name: orlo-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: orlo-db
+          property: password
+      # Llave del JWT del panel: Render genera una aleatoria (base64, 256 bits)
+      - key: ORLO_JWT_SECRET
+        generateValue: true
+      # Las pide Render al crear el Blueprint (no se guardan en el repositorio)
+      - key: ORLO_ADMIN_PASSWORD
+        sync: false
+      - key: ORLO_ANTHROPIC_API_KEY
+        sync: false
+      - key: ORLO_FIREBASE_PROJECT_ID
+        sync: false
+      # Origen de la web; si Render le pone un sufijo al nombre de orlo-web, cambia este valor
+      - key: ORLO_CORS_ORIGINS
+        value: https://orlo-web.onrender.com
+      # Credenciales de Firebase Admin: Secret File con ese nombre en el panel de orlo-api
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json
+      # Pruebas con varias personas: todo desbloqueado y notificaciones al publicar lecciones
+      - key: ORLO_PREMIUM_PARA_TODOS
+        value: "true"
+      - key: ORLO_FCM_ENABLED
+        value: "true"
+
+  # Web de usuarios y panel (Angular, sitio estático)
+  - type: web
+    name: orlo-web
+    runtime: static
+    autoDeployTrigger: "off"
+    # Falla a propósito si environment.ts todavía tiene la configuración de ejemplo
+    buildCommand: >-
+      cd frontend &&
+      if grep -q CAMBIAR src/environments/environment.ts; then
+      echo "Falta la configuración de producción en frontend/src/environments/environment.ts"; exit 1; fi &&
+      npm ci && npx ng build
+    staticPublishPath: ./frontend/dist/frontend/browser
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+    # Aplicación de una sola página: cualquier ruta (/inicio, /admin...) devuelve index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: orlo-db
+    plan: free
+    region: oregon
+    databaseName: orlo
+    user: orlo

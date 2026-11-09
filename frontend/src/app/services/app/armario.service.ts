@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
 
 import { GuardadoDoc, OutfitDelDiaDoc, OutfitDoc, PrendaDoc } from '../../models/firestore.model';
 import { ExploreItemDto } from '../../models/app-api.model';
+import { ignorarSiNoExiste } from '../../utils/storage';
 import { FirebaseBase } from './firebase-base';
 
 const USERS = 'users';
@@ -51,7 +52,8 @@ export class ArmarioService extends FirebaseBase {
       if (foto) {
         const archivo = ref(this.storage, `garmentImages/${uid}/${prenda.id}.jpg`);
         await uploadBytes(archivo, foto, { contentType: 'image/jpeg' });
-        photoUrl = await getDownloadURL(archivo);
+        // &v= evita que el navegador muestre la foto anterior desde caché (igual que la app)
+        photoUrl = `${await getDownloadURL(archivo)}&v=${Date.now()}`;
       }
       // El id es el del documento: no se guarda como campo (igual que la app)
       const { id, ...resto } = prenda;
@@ -68,7 +70,7 @@ export class ArmarioService extends FirebaseBase {
     return this.ctx(async () => {
       await deleteDoc(doc(this.db, USERS, uid, 'garments', prenda.id));
       if (prenda.photoUrl?.includes('garmentImages')) {
-        await deleteObject(ref(this.storage, `garmentImages/${uid}/${prenda.id}.jpg`)).catch(() => undefined);
+        await deleteObject(ref(this.storage, `garmentImages/${uid}/${prenda.id}.jpg`)).catch(ignorarSiNoExiste);
       }
     });
   }

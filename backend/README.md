@@ -16,13 +16,15 @@ Requisitos: Java 17 o superior, Docker y Firebase CLI (`npm i -g firebase-tools`
    ```bash
    firebase emulators:start --only auth --project demo-orlo
    ```
-3. Variables de entorno (todas tienen un valor de desarrollo, salvo la de la IA):
+3. Secretos de desarrollo: copia `.env.example` como `.env` (está en `.gitignore`) y llena `ORLO_JWT_SECRET` (`openssl rand -base64 32`) y `ORLO_ADMIN_PASSWORD`. Spring lo lee con `spring.config.import=optional:file:.env[.properties]`; sin esos dos valores el backend no arranca.
+
+   Variables de entorno (las demás tienen un valor de desarrollo, salvo la de la IA):
 
    | Variable | Para qué | Valor por defecto en `dev` |
    |---|---|---|
    | `ORLO_ANTHROPIC_API_KEY` | Clave del API de Anthropic para el asesor | — (sin ella el asesor responde 503) |
-   | `ORLO_ADMIN_PASSWORD` | Contraseña del administrador inicial `admin@orlo.co` | `OrloAdmin2026` |
-   | `ORLO_JWT_SECRET` | Secreto (Base64) de los tokens del panel | uno de desarrollo |
+   | `ORLO_ADMIN_PASSWORD` | Contraseña del administrador inicial `admin@orlo.co` | la de tu `.env` |
+   | `ORLO_JWT_SECRET` | Secreto (Base64) de los tokens del panel | el de tu `.env` |
    | `DATABASE_URL`, `DB_USER`, `DB_PASSWORD` | Conexión a PostgreSQL | `jdbc:postgresql://localhost:5433/orlo`, `orlo`, `orlo_dev` |
    | `ORLO_CORS_ORIGINS` | Orígenes permitidos (panel web) | `http://localhost:4200` |
    | `FIREBASE_AUTH_EMULATOR_HOST` | Emulador de Auth | `localhost:9099` |
@@ -104,3 +106,12 @@ Java abre un socket local en la carpeta temporal. Si esa ruta usa el nombre cort
 ## Producción
 
 Perfil `prod` (`--spring.profiles.active=prod`): toda la configuración llega por variables de entorno, Swagger queda apagado y Firebase usa las credenciales de la cuenta de servicio en lugar del emulador.
+
+- **Imagen Docker** (`Dockerfile`): compila el `.jar` con el Maven Wrapper y lo corre sobre `eclipse-temurin:17-jre` con el perfil `prod`. `docker-entrypoint.sh` convierte `DATABASE_URL` del formato `postgresql://` (el que entrega Render) al formato JDBC.
+  ```bash
+  docker build -t orlo-api .
+  ```
+- **Salud**: `GET /actuator/health` es público y responde `{"status":"UP"}`; el resto de Actuator no se expone.
+- **Detrás del proxy del hosting**: `server.forward-headers-strategy=framework` respeta `X-Forwarded-*`.
+- **Recursos en prod**: `THREADS` (hilos de Tomcat, 50) y `DB_POOL` (conexiones a la base, 5), pensados para el plan gratis.
+- Despliegue en Render paso a paso: [`../docs/despliegue-render.md`](../docs/despliegue-render.md).

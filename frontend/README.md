@@ -25,7 +25,7 @@ Abre `http://localhost:4200`.
 | Parte | Cómo entrar |
 |---|---|
 | Web de usuarios | `http://localhost:4200/entrar` con `andres.prueba@orlo.test` / `Prueba2026` (o `laura.prueba@orlo.test`) |
-| Panel | `http://localhost:4200/login` con `admin@orlo.co` / `OrloAdmin2026` |
+| Panel | `http://localhost:4200/login` con `admin@orlo.co` y la contraseña de `backend/.env` (`ORLO_ADMIN_PASSWORD`) |
 
 En desarrollo (`environment.development.ts`) la web se conecta a los emuladores con el proyecto `demo-orlo`, sin credenciales reales. Con `ORLO_PREMIUM_PARA_TODOS=true` en el backend (valor por defecto en dev) todo está desbloqueado; no hay cobro real.
 

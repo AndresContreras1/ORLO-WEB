@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/auth/login").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Solo health es público; el resto de Actuator no se expone
+                        .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(Role.ADMIN)
                         .requestMatchers("/api/v1/**").hasAuthority(AppPrincipal.AUTHORITY)
                         .anyRequest().denyAll())
