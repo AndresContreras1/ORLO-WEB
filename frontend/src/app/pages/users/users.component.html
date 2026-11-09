@@ -1,0 +1,76 @@
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title">Usuarios</h1>
+    <p class="text-secondary small mb-0">Aparecen cuando abren la app por primera vez.</p>
+  </div>
+  <div class="input-group" style="max-width: 20rem;">
+    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+    <input type="search" class="form-control" placeholder="Buscar por correo" [formControl]="buscar" id="buscarUsuario"
+           aria-label="Buscar por correo">
+  </div>
+</div>
+
+@if (errorAccion()) {
+  <div class="alert alert-warning d-flex justify-content-between align-items-center">
+    {{ errorAccion() }}
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="errorAccion.set(null)"></button>
+  </div>
+}
+
+<app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+@if (!cargando() && !error() && pagina(); as p) {
+  <div class="card border-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Correo</th>
+            <th class="d-none d-md-table-cell">Registro</th>
+            <th class="d-none d-lg-table-cell">Última visita</th>
+            <th>Plan</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of p.content; track usuario.uid) {
+            <tr>
+              <td>
+                <div>{{ usuario.email ?? 'Sin correo' }}</div>
+                <code class="small text-secondary">{{ usuario.uid }}</code>
+              </td>
+              <td class="d-none d-md-table-cell small">{{ usuario.createdAt | date: 'mediumDate' }}</td>
+              <td class="d-none d-lg-table-cell small">{{ usuario.lastSeenAt | date: 'short' }}</td>
+              <td>
+                @if (usuario.premium) {
+                  <span class="badge bg-accent-soft text-accent"><i class="bi bi-stars me-1"></i>Premium</span>
+                } @else {
+                  <span class="badge text-bg-light border">Gratis</span>
+                }
+              </td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm" [class.btn-outline-secondary]="usuario.premium"
+                        [class.btn-primary]="!usuario.premium" [disabled]="cambiando() === usuario.uid"
+                        (click)="alternarPremium(usuario)">
+                  {{ usuario.premium ? 'Quitar premium' : 'Activar premium' }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="text-secondary">No hay usuarios con ese correo.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (p.totalPages > 1) {
+    <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Páginas">
+      <span class="small text-secondary">{{ p.totalElements }} usuarios · página {{ p.page + 1 }} de {{ p.totalPages }}</span>
+      <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="p.page === 0" (click)="irA(p.page - 1)">Anterior</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="p.page + 1 >= p.totalPages" (click)="irA(p.page + 1)">Siguiente</button>
+      </div>
+    </nav>
+  }
+}

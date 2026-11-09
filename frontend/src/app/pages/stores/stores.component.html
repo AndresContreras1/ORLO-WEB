@@ -1,0 +1,66 @@
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title">Tiendas sugeridas</h1>
+    <p class="text-secondary small mb-0">Catálogo manual. En la app aparece como opción secundaria, nunca como presión para comprar.</p>
+  </div>
+  <a routerLink="/admin/stores/new" class="btn btn-primary" id="btnNuevaTienda"><i class="bi bi-plus-lg me-1"></i>Nueva tienda</a>
+</div>
+
+@if (errorAccion()) {
+  <div class="alert alert-warning d-flex justify-content-between align-items-center">
+    {{ errorAccion() }}
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="errorAccion.set(null)"></button>
+  </div>
+}
+
+<app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+@if (!cargando() && !error()) {
+  <div class="card border-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Tienda</th>
+            <th class="d-none d-md-table-cell">Prendas</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tienda of tiendas(); track tienda.id) {
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ tienda.name }}</div>
+                <a [href]="tienda.url" target="_blank" rel="noopener" class="small">{{ tienda.url }}</a>
+              </td>
+              <td class="d-none d-md-table-cell small">{{ tienda.garmentTypes }}</td>
+              <td>
+                <span class="badge" [class.text-bg-success]="tienda.active" [class.text-bg-secondary]="!tienda.active">
+                  {{ tienda.active ? 'Activa' : 'Inactiva' }}
+                </span>
+                @if (tienda.affiliate) {
+                  <span class="badge text-bg-light border ms-1">Afiliado</span>
+                }
+              </td>
+              <td class="text-end text-nowrap">
+                <a [routerLink]="['/admin/stores', tienda.id]" class="btn btn-sm btn-outline-secondary me-1" aria-label="Editar">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="aBorrar.set(tienda)" aria-label="Borrar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="text-secondary">Todavía no hay tiendas.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<app-confirm-dialog [open]="aBorrar() !== null" [busy]="borrando()" heading="Borrar tienda"
+                    [message]="'Se borrará ' + (aBorrar()?.name ?? '') + '. Si solo quieres ocultarla, edítala y desactívala.'"
+                    (confirmed)="confirmarBorrado()" (cancelled)="cerrarDialogo()" />

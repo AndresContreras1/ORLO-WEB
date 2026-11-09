@@ -1,0 +1,78 @@
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title">Lecciones</h1>
+    <p class="text-secondary small mb-0">Cápsulas cortas de la sección Aprende. La muestra gratis la ve cualquier usuario.</p>
+  </div>
+  <a routerLink="/admin/lessons/new" class="btn btn-primary" id="btnNuevaLeccion"><i class="bi bi-plus-lg me-1"></i>Nueva lección</a>
+</div>
+
+@if (errorAccion()) {
+  <div class="alert alert-warning d-flex justify-content-between align-items-center">
+    {{ errorAccion() }}
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="errorAccion.set(null)"></button>
+  </div>
+}
+
+<app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+@if (!cargando() && !error()) {
+  <div class="card border-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Lección</th>
+            <th class="d-none d-md-table-cell">Ejemplos</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (leccion of lecciones(); track leccion.id) {
+            <tr>
+              <td>{{ leccion.order }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  @if (leccion.coverUrl) {
+                    <img [src]="leccion.coverUrl" alt="" class="thumb">
+                  }
+                  <div>
+                    <div class="fw-semibold">{{ leccion.title }}</div>
+                    <div class="small text-secondary">{{ leccion.summary }} · {{ leccion.minutes }} min</div>
+                  </div>
+                </div>
+              </td>
+              <td class="d-none d-md-table-cell">{{ leccion.examples.length }}</td>
+              <td>
+                @if (leccion.freeSample) {
+                  <span class="badge bg-accent-soft text-accent me-1">Gratis</span>
+                }
+                @if (leccion.usesColorProfile) {
+                  <span class="badge text-bg-light border me-1">Usa el perfil</span>
+                }
+                <span class="badge" [class.text-bg-success]="leccion.published" [class.text-bg-secondary]="!leccion.published">
+                  {{ leccion.published ? 'Publicada' : 'Oculta' }}
+                </span>
+              </td>
+              <td class="text-end text-nowrap">
+                <a [routerLink]="['/admin/lessons', leccion.id]" class="btn btn-sm btn-outline-secondary me-1" aria-label="Editar">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="aBorrar.set(leccion)" aria-label="Borrar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="text-secondary">Todavía no hay lecciones.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<app-confirm-dialog [open]="aBorrar() !== null" [busy]="borrando()" heading="Borrar lección"
+                    [message]="'Se borrará la lección ' + (aBorrar()?.title ?? '') + '. Esta acción no se puede deshacer.'"
+                    (confirmed)="confirmarBorrado()" (cancelled)="cerrarDialogo()" />

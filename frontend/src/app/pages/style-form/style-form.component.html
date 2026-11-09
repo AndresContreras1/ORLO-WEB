@@ -1,0 +1,95 @@
+<div class="mb-4">
+  <a routerLink="/admin/styles" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Estilos</a>
+  <h1 class="page-title mt-1">{{ esEdicion ? 'Editar estilo' : 'Nuevo estilo' }}</h1>
+</div>
+
+<app-load-state [loading]="cargando()" [error]="errorCarga()" (retry)="cargar()" />
+
+@if (!cargando() && !errorCarga()) {
+  <div class="row">
+    <div class="col-12 col-xl-8">
+      <form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="card border-0">
+        <div class="card-body p-4 row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="name">Nombre</label>
+            <input id="name" class="form-control" formControlName="name" placeholder="Urbano"
+                   [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+            <app-field-error [control]="form.controls.name" />
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="code">Código</label>
+            <input id="code" class="form-control" formControlName="code" placeholder="urbano"
+                   [class.is-invalid]="form.controls.code.touched && form.controls.code.invalid">
+            <div class="form-text">Minúsculas y guion bajo. La app lo usa para identificar el estilo.</div>
+            <app-field-error [control]="form.controls.code" />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="description">Descripción</label>
+            <textarea id="description" rows="3" class="form-control" formControlName="description"
+                      placeholder="En dos o tres líneas, con palabras simples"
+                      [class.is-invalid]="form.controls.description.touched && form.controls.description.invalid"></textarea>
+            <app-field-error [control]="form.controls.description" />
+          </div>
+
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="form-label mb-0">Paleta de colores</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="agregarColor()">
+                <i class="bi bi-plus-lg me-1"></i>Color
+              </button>
+            </div>
+            <div class="row g-2">
+              @for (control of form.controls.palette.controls; track control; let i = $index) {
+                <div class="col-12 col-sm-6 col-lg-4">
+                  <div class="input-group">
+                    <input type="color" class="form-control form-control-color" [formControl]="control"
+                           [attr.aria-label]="'Color ' + (i + 1)">
+                    <input class="form-control" [formControl]="control" [class.is-invalid]="control.touched && control.invalid">
+                    <button type="button" class="btn btn-outline-danger" (click)="quitar(form.controls.palette, i)"
+                            aria-label="Quitar color"><i class="bi bi-x-lg"></i></button>
+                  </div>
+                </div>
+              }
+            </div>
+            @if (form.controls.palette.length === 0 && form.touched) {
+              <div class="invalid-feedback d-block">Agrega al menos un color.</div>
+            }
+          </div>
+
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="form-label mb-0">Galería de referencias (URL de imagen)</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="agregarFoto()">
+                <i class="bi bi-plus-lg me-1"></i>Foto
+              </button>
+            </div>
+            <p class="form-text mt-0">Las primeras 6 se muestran gratis; el resto, solo a premium.</p>
+            @for (control of form.controls.gallery.controls; track control; let i = $index) {
+              <div class="d-flex gap-2 align-items-center mb-2">
+                @if (control.value) {
+                  <img [src]="control.value" alt="" class="thumb">
+                }
+                <input class="form-control" [formControl]="control" placeholder="https://…"
+                       [class.is-invalid]="control.touched && control.invalid">
+                <button type="button" class="btn btn-outline-danger" (click)="quitar(form.controls.gallery, i)"
+                        aria-label="Quitar foto"><i class="bi bi-x-lg"></i></button>
+              </div>
+            } @empty {
+              <p class="small text-secondary">Sin fotos todavía.</p>
+            }
+          </div>
+
+          @if (errorGuardar()) {
+            <div class="col-12"><div class="alert alert-danger mb-0">{{ errorGuardar() }}</div></div>
+          }
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <a routerLink="/admin/styles" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" id="btnGuardar" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando…' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}
