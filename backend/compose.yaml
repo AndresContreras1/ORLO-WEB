@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: orlo-postgres
+    environment:
+      POSTGRES_DB: orlo
+      POSTGRES_USER: orlo
+      POSTGRES_PASSWORD: orlo_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - orlo-pgdata:/var/lib/postgresql/data
+
+volumes:
+  orlo-pgdata:
