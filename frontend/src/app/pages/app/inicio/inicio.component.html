@@ -1,0 +1,104 @@
+<section class="mb-4">
+  <h1 class="h2 fw-bold mb-1" id="saludo">{{ saludo() }}, {{ usuario.primerNombre() }}</h1>
+  <p class="text-secondary mb-0">¿Qué hacemos hoy con tu ropa?</p>
+</section>
+
+<div class="row g-4">
+  <!-- Outfit del día -->
+  <div class="col-12 col-lg-7">
+    <div class="card border-0 h-100">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-sun text-accent fs-4"></i>
+          <h2 class="h5 fw-bold mb-0">Tu outfit de hoy</h2>
+        </div>
+        @if (outfitDelDia(); as o) {
+          <h3 class="h6 fw-bold" id="outfitDelDiaTitulo">{{ o.title }}</h3>
+          <ul class="mb-2">
+            @for (item of o.items; track $index) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+          <p class="text-secondary small">{{ o.why }}</p>
+          @if (guardado()) {
+            <span class="text-success small"><i class="bi bi-check-circle me-1"></i>Guardado en tus outfits</span>
+          } @else {
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="guardarComoOutfit(o)">
+              <i class="bi bi-bookmark me-1"></i>Guardar outfit
+            </button>
+          }
+        } @else {
+          <p class="text-secondary">El asesor arma un outfit para hoy con las prendas de tu armario y tu clima.</p>
+          @if (errorOutfit()) {
+            <div class="alert alert-light border small">{{ errorOutfit() }}</div>
+          }
+          <button type="button" class="btn btn-primary" (click)="pedirOutfitDelDia()" [disabled]="pidiendo()" id="btnOutfitDelDia">
+            {{ pidiendo() ? 'Pensando tu outfit…' : 'Ver mi outfit de hoy' }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Tu estilo -->
+  <div class="col-12 col-lg-5">
+    @if (usuario.resultado(); as r) {
+      <div class="card border-0 h-100">
+        <div class="card-body p-4">
+          <div class="small text-secondary">Tu estilo</div>
+          <div class="h4 fw-bold mb-2">{{ r.primary.name }} · {{ r.secondary.name.toLowerCase() }}</div>
+          <div class="d-flex gap-1 mb-3">
+            @for (c of r.primary.palette; track $index) {
+              <span class="palette-swatch" [style.background]="c"></span>
+            }
+          </div>
+          <a routerLink="/armario/estilo" class="btn btn-sm btn-outline-secondary">Ver mi estilo</a>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Las cuatro secciones -->
+  <div class="col-12">
+    <div class="row g-3">
+      <div class="col-6 col-lg-3">
+        <a routerLink="/aprende" class="card border-0 h-100 text-decoration-none text-body seccion">
+          <div class="card-body">
+            <i class="bi bi-journal-text text-accent fs-3"></i>
+            <div class="fw-bold mt-2">Aprende</div>
+            <div class="small text-secondary">{{ avance().completadas }} de {{ avance().total }} lecciones</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <a routerLink="/asesor" class="card border-0 h-100 text-decoration-none text-body seccion">
+          <div class="card-body">
+            <i class="bi bi-chat-heart text-accent fs-3"></i>
+            <div class="fw-bold mt-2">Asesor IA</div>
+            <div class="small text-secondary">
+              @if (usuario.me(); as me) { {{ me.remainingMessages }} mensajes hoy } @else { Pregúntale qué ponerte }
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <a routerLink="/explora" class="card border-0 h-100 text-decoration-none text-body seccion">
+          <div class="card-body">
+            <i class="bi bi-compass text-accent fs-3"></i>
+            <div class="fw-bold mt-2">Explora</div>
+            <div class="small text-secondary">Ideas para tu estilo</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <a routerLink="/armario" class="card border-0 h-100 text-decoration-none text-body seccion">
+          <div class="card-body">
+            <i class="bi bi-grid-3x3-gap text-accent fs-3"></i>
+            <div class="fw-bold mt-2">Mi armario</div>
+            <div class="small text-secondary">{{ usuario.prendas().length }} prendas · {{ favoritos() }} outfits favoritos</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

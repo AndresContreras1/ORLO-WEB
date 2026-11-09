@@ -1,0 +1,94 @@
+@import "../../../../styles/theme";
+
+.asesor {
+  display: grid;
+  grid-template-columns: 17rem 1fr;
+  gap: 1rem;
+  height: calc(100vh - 8.5rem);
+  min-height: 28rem;
+}
+
+.conversaciones {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .lista {
+    overflow-y: auto;
+  }
+
+  .item {
+    border-radius: $border-radius-sm;
+
+    &:hover {
+      background: $orlo-bg;
+    }
+
+    &.activa {
+      background: $orlo-accent-soft;
+    }
+  }
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header {
+  border-bottom: 1px solid $orlo-border;
+}
+
+.mensajes {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.burbuja {
+  max-width: 48rem;
+  padding: .75rem 1rem;
+  border-radius: 1rem;
+}
+
+.usuario {
+  background: $orlo-accent;
+  color: #fff;
+  border-bottom-right-radius: .25rem;
+}
+
+.asesor-msg {
+  background: $orlo-bg;
+  border-bottom-left-radius: .25rem;
+}
+
+.outfit {
+  background: $orlo-surface;
+}
+
+.entrada {
+  border-top: 1px solid $orlo-border;
+}
+
+@media (max-width: 991.98px) {
+  .asesor {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 10rem);
+  }
+
+  .conversaciones {
+    display: none;
+
+    &.abierta {
+      display: flex;
+      position: fixed;
+      inset: 4rem 1rem auto 1rem;
+      max-height: 60vh;
+      z-index: 25;
+      box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .12);
+    }
+  }
+}

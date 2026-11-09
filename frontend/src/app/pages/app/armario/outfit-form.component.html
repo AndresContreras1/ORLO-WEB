@@ -1,0 +1,61 @@
+<a routerLink="/armario/outfits" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Mis outfits</a>
+<h2 class="h4 fw-bold mt-1 mb-3">{{ esEdicion ? 'Editar outfit' : 'Crear outfit' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="row g-4">
+  <div class="col-12 col-lg-5">
+    <div class="card border-0">
+      <div class="card-body p-4 d-flex flex-column gap-4">
+        <div>
+          <label for="name" class="form-label fw-semibold">Nombre</label>
+          <input id="name" class="form-control" formControlName="name" placeholder="Ej. Lunes de clase"
+                 [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+          <app-field-error [control]="form.controls.name" />
+        </div>
+        <div>
+          <div class="fw-semibold mb-2">¿Para qué ocasión?</div>
+          <app-option-chips formControlName="occasion" [opciones]="ocasiones" etiqueta="Ocasión" />
+          @if (form.controls.occasion.touched && form.controls.occasion.invalid) {
+            <div class="invalid-feedback d-block">Elige la ocasión.</div>
+          }
+        </div>
+        <div>
+          <label for="why" class="form-label fw-semibold">Nota (opcional)</label>
+          <textarea id="why" class="form-control" rows="3" formControlName="why" placeholder="Por qué te gusta esta combinación"></textarea>
+        </div>
+        <p class="mb-0 small text-secondary">{{ seleccion().length }} prendas elegidas</p>
+        @if (error()) { <div class="alert alert-danger mb-0">{{ error() }}</div> }
+        <div class="d-flex justify-content-end gap-2">
+          <a routerLink="/armario/outfits" class="btn btn-outline-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary" [disabled]="guardando()" id="btnGuardarOutfit">
+            {{ guardando() ? 'Guardando…' : 'Guardar outfit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-7">
+    @for (g of grupos(); track g.categoria) {
+      <h3 class="h6 fw-bold">{{ g.categoria }}</h3>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        @for (p of g.prendas; track p.id) {
+          <button type="button" class="btn p-1 border rounded-3 bg-white text-center seleccionable"
+                  [class.border-primary]="seleccion().includes(p.id)" [class.border-2]="seleccion().includes(p.id)"
+                  [attr.aria-pressed]="seleccion().includes(p.id)" (click)="alternar(p.id)" style="width:96px">
+            @if (p.photoUrl) {
+              <img [src]="p.photoUrl" [alt]="p.name" style="width:84px;height:84px;object-fit:contain">
+            } @else {
+              <div class="d-flex align-items-center justify-content-center" style="height:84px"><i class="bi bi-image text-secondary fs-3"></i></div>
+            }
+            <div class="text-truncate" style="font-size:.7rem">{{ p.name }}</div>
+          </button>
+        }
+      </div>
+    } @empty {
+      <div class="text-center py-5">
+        <p class="text-secondary">Necesitas prendas en tu armario para armar un outfit.</p>
+        <a routerLink="/armario/prendas/nueva" class="btn btn-primary">Agregar prenda</a>
+      </div>
+    }
+  </div>
+</form>

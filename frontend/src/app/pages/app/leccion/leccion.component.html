@@ -1,0 +1,89 @@
+<a routerLink="/aprende" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Aprende</a>
+
+<app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+@if (leccion(); as l) {
+  <div class="row g-4 mt-1">
+    <div class="col-12 col-lg-8">
+      <h1 class="h2 fw-bold" id="tituloLeccion">{{ l.title }}</h1>
+      <p class="lead">{{ l.mainIdea }}</p>
+
+      @if (l.usesColorProfile) {
+        <div class="card border-0 my-4">
+          <div class="card-body p-4">
+            @if (colores(); as c) {
+              <h2 class="h6 fw-bold">Tus colores</h2>
+              <div class="d-flex flex-wrap gap-4 my-3">
+                @for (x of [c.piel, c.cabello, c.ojos]; track $index) {
+                  @if (x.hex) {
+                    <div class="text-center small"><span class="palette-swatch d-block mx-auto mb-1" style="width:2.6rem;height:2.6rem" [style.background]="x.hex"></span>{{ x.nombre }}</div>
+                  }
+                }
+              </div>
+              <p class="mb-2">Por tus colores, te pueden favorecer los tonos <strong>{{ c.tipo }}</strong>, por ejemplo:</p>
+              <div class="d-flex gap-2">
+                @for (h of c.sugeridos; track h) {
+                  <span class="palette-swatch" style="width:2.2rem;height:2.2rem" [style.background]="h"></span>
+                }
+              </div>
+              <p class="small text-secondary mt-2 mb-0">Es una guía, no una regla: usa lo que te haga sentir bien.</p>
+            } @else {
+              <p class="mb-2">Esta lección usa tus colores de piel, cabello y ojos para decirte qué tonos te pueden favorecer. Mientras tanto, aquí está la explicación general.</p>
+              <a routerLink="/cuenta/perfil" class="btn btn-sm btn-outline-secondary">Completar mis colores</a>
+            }
+          </div>
+        </div>
+      }
+
+      <h2 class="h5 fw-bold mt-4">Ejemplos</h2>
+      <div class="row g-3">
+        @for (e of l.examples; track $index) {
+          <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card border-0 h-100">
+              <img [src]="e.imageUrl" alt="" class="card-img-top bg-white p-2" style="aspect-ratio:1/1;object-fit:contain" loading="lazy">
+              <div class="card-body small">{{ e.text }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 bg-accent-soft mb-3">
+        <div class="card-body p-4">
+          <div class="fw-bold mb-1"><i class="bi bi-lightbulb me-1"></i>Para aplicar hoy</div>
+          <p class="mb-0">{{ l.tip }}</p>
+        </div>
+      </div>
+
+      @if (l.review; as r) {
+        <div class="card border-0 mb-3">
+          <div class="card-body p-4">
+            <div class="fw-bold mb-2">Repaso</div>
+            <p class="mb-2">{{ r.question }}</p>
+            <div class="d-flex flex-column gap-2">
+              @for (o of r.options; track $index; let i = $index) {
+                <button type="button" class="btn text-start" [disabled]="respuesta() !== null"
+                        [class.btn-success]="respuesta() !== null && i === r.correctIndex"
+                        [class.btn-outline-danger]="respuesta() === i && i !== r.correctIndex"
+                        [class.btn-outline-secondary]="respuesta() === null || (i !== r.correctIndex && respuesta() !== i)"
+                        (click)="respuesta.set(i)">{{ o }}</button>
+              }
+            </div>
+            @if (respuesta() !== null) {
+              <p class="small mt-2 mb-0">{{ respuesta() === r.correctIndex ? '¡Bien!' : 'Casi. La respuesta correcta está en verde.' }}</p>
+            }
+          </div>
+        </div>
+      }
+
+      @if (estado() === 'completada') {
+        <div class="alert alert-success d-flex align-items-center gap-2 mb-0" id="leccionCompletada"><i class="bi bi-check-circle"></i>Lección completada</div>
+      } @else {
+        <button type="button" class="btn btn-primary btn-lg w-100" (click)="completar()" [disabled]="marcando()" id="btnCompletar">
+          Marcar como completada
+        </button>
+      }
+    </div>
+  </div>
+}

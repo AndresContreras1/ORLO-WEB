@@ -1,0 +1,46 @@
+<div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-1">Aprende</h1>
+    <p class="text-secondary mb-0">Lecciones de 3 a 5 minutos. Ábrelas en el orden que quieras y repítelas cuando quieras.</p>
+  </div>
+  @if (lecciones().length) {
+    <div style="min-width: 14rem;">
+      <div class="d-flex justify-content-between small mb-1"><span>Tu avance</span><strong id="avance">{{ completadas() }} de {{ lecciones().length }}</strong></div>
+      <div class="progress" style="height:.5rem"><div class="progress-bar" [style.width.%]="porcentaje()"></div></div>
+    </div>
+  }
+</div>
+
+<app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+<div class="row g-3">
+  @for (l of lecciones(); track l.id) {
+    <div class="col-12 col-md-6 col-xl-4">
+      <a [routerLink]="bloqueada(l) ? '/premium' : ['/aprende', l.id]" class="card border-0 h-100 text-decoration-none text-body leccion-card">
+        <div class="d-flex gap-3 p-3">
+          @if (l.coverUrl) {
+            <img [src]="l.coverUrl" alt="" class="rounded-3 bg-white" style="width:5.5rem;height:5.5rem;object-fit:contain" loading="lazy">
+          }
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap gap-1 mb-1">
+              @switch (estado(l.id)) {
+                @case ('completada') { <span class="badge text-bg-success"><i class="bi bi-check2 me-1"></i>Completada</span> }
+                @case ('en_curso') { <span class="badge bg-accent-soft text-accent">En curso</span> }
+                @default { <span class="badge text-bg-light border">Sin empezar</span> }
+              }
+              @if (l.freeSample) {
+                <span class="badge text-bg-light border">Gratis</span>
+              }
+              @if (bloqueada(l)) {
+                <span class="badge text-bg-light border"><i class="bi bi-lock me-1"></i>Premium</span>
+              }
+            </div>
+            <div class="fw-bold">{{ l.order }}. {{ l.title }}</div>
+            <div class="small text-secondary">{{ l.summary }}</div>
+            <div class="small text-secondary mt-1"><i class="bi bi-clock me-1"></i>{{ l.minutes }} min</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  }
+</div>

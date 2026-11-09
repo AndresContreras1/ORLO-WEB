@@ -44,7 +44,7 @@ export class StyleFormComponent implements OnInit {
     if (this.esEdicion) {
       this.cargar();
     } else {
-      this.agregarColor('#E8736C');
+      this.agregarColor('#E2725B');
     }
   }
 

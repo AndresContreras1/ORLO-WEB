@@ -23,6 +23,16 @@
             <app-field-error [control]="form.controls.garmentTypes" />
           </div>
           <div class="col-12">
+            <div class="form-label">Categorías que vende</div>
+            <div class="d-flex flex-wrap gap-2">
+              @for (c of categorias; track c.codigo) {
+                <button type="button" class="btn btn-sm rounded-pill" [class.btn-primary]="categoriasElegidas().includes(c.codigo)"
+                        [class.btn-outline-secondary]="!categoriasElegidas().includes(c.codigo)" (click)="alternarCategoria(c.codigo)">{{ c.etiqueta }}</button>
+              }
+            </div>
+            <div class="form-text">Explora la sugiere en "¿Dónde la encuentro?" para prendas de esas categorías.</div>
+          </div>
+          <div class="col-12">
             <label class="form-label" for="url">Enlace</label>
             <input id="url" class="form-control" formControlName="url" placeholder="https://"
                    [class.is-invalid]="form.controls.url.touched && form.controls.url.invalid">
