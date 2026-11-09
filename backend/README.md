@@ -35,7 +35,7 @@ Requisitos: Java 17 o superior, Docker y Firebase CLI (`npm i -g firebase-tools`
    ```
    Queda en `http://localhost:8090`. La documentación interactiva está en `http://localhost:8090/swagger-ui.html`.
 
-Al arrancar, Flyway crea el esquema y `DataLoader` carga datos de ejemplo una sola vez: 8 estilos con paleta, un cuestionario de 10 preguntas con su tabla de puntos, 6 lecciones (la primera es la muestra gratis), 5 tiendas con sus categorías, 46 prendas reales en el catálogo de Explora, la configuración del asesor y el administrador. Las galerías de los estilos, las opciones del cuestionario y las lecciones usan esas mismas fotos de ropa (`CatalogoDeEjemplo`). Para volver a cargar todo desde cero: `docker compose down -v` y arrancar de nuevo.
+Al arrancar, Flyway crea el esquema y `DataLoader` carga datos de ejemplo una sola vez: 8 estilos con paleta, un cuestionario de 10 preguntas con su tabla de puntos, 6 lecciones (la primera es la muestra gratis), 5 tiendas con sus categorías, 47 prendas reales en el catálogo de Explora, la configuración del asesor y el administrador. Las galerías de los estilos, las opciones del cuestionario y las lecciones usan esas mismas fotos de ropa (`CatalogoDeEjemplo`). Para volver a cargar todo desde cero: `docker compose down -v` y arrancar de nuevo.
 
 Endpoints principales (detalle en Swagger y en [`../docs/modelo-de-datos.md`](../docs/modelo-de-datos.md)):
 
