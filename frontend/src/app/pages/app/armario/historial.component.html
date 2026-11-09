@@ -1,0 +1,36 @@
+<div class="d-flex flex-wrap gap-2 mb-4">
+  @for (f of filtros; track f.id) {
+    <button type="button" class="btn btn-sm rounded-pill" [class.btn-primary]="filtro() === f.id"
+            [class.btn-outline-secondary]="filtro() !== f.id" (click)="filtro.set(f.id)">{{ f.label }}</button>
+  }
+</div>
+
+@for (dia of dias(); track dia.fecha) {
+  <h3 class="h6 text-secondary text-uppercase fw-semibold mt-4 mb-2">{{ dia.fecha | date: "EEEE d 'de' MMMM, y" }}</h3>
+  <div class="list-group">
+    @for (e of dia.eventos; track e.tipo + e.fecha + e.titulo) {
+      <div class="list-group-item d-flex align-items-center gap-3 py-3">
+        <i class="bi fs-5 text-primary" [class]="icono(e.tipo)"></i>
+        <div class="flex-grow-1">
+          @if (e.enlace) {
+            <a [routerLink]="e.enlace" class="fw-semibold text-body text-decoration-none stretched-link-sm">{{ e.titulo }}</a>
+          } @else {
+            <span class="fw-semibold">{{ e.titulo }}</span>
+          }
+          <div class="small text-secondary">{{ e.detalle }} · {{ e.fecha | date: 'shortTime' }}</div>
+        </div>
+        @if (e.conversacion) {
+          <button type="button" class="btn btn-sm btn-link text-secondary" (click)="aBorrar.set(e.conversacion)" aria-label="Borrar conversación">
+            <i class="bi bi-trash"></i>
+          </button>
+        }
+      </div>
+    }
+  </div>
+} @empty {
+  <p class="text-secondary text-center py-5">Aún no hay nada en tu historial.</p>
+}
+
+<app-confirm-dialog [open]="aBorrar() !== null" [busy]="borrando()" heading="Borrar conversación"
+                    [message]="'Se borrará la conversación ' + (aBorrar()?.title ?? '') + ' con todos sus mensajes.'"
+                    (confirmed)="confirmarBorrado()" (cancelled)="aBorrar.set(null)" />

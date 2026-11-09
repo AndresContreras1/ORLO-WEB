@@ -1,0 +1,27 @@
+@import "../../../../styles/theme";
+
+.opcion {
+  border: 2px solid transparent;
+  overflow: hidden;
+  transition: border-color .15s ease, transform .15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &.elegida {
+    border-color: $orlo-accent;
+
+    .bi {
+      color: $orlo-accent;
+    }
+  }
+}
+
+.opcion-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: $orlo-surface;
+  padding: .5rem;
+}

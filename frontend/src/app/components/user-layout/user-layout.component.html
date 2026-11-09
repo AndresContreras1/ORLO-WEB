@@ -1,0 +1,47 @@
+<header class="app-header">
+  <nav class="container-xl d-flex align-items-center gap-4 py-2">
+    <a routerLink="/inicio" class="brand text-decoration-none d-flex align-items-center gap-2" aria-label="ORLO, ir al inicio">
+      <img src="logo-simbolo.svg" alt="" width="32" height="32">
+      <span class="wordmark">orlo</span>
+    </a>
+    <ul class="nav-desktop list-unstyled d-none d-md-flex align-items-center gap-1 mb-0">
+      <li><a routerLink="/inicio" routerLinkActive="active" class="nav-item-link">Inicio</a></li>
+      @for (s of secciones; track s.route) {
+        <li><a [routerLink]="s.route" routerLinkActive="active" class="nav-item-link">{{ s.label }}</a></li>
+      }
+    </ul>
+    <div class="ms-auto position-relative">
+      <button type="button" class="btn avatar-btn d-flex align-items-center gap-2" (click)="menuCuenta.set(!menuCuenta())"
+              [attr.aria-expanded]="menuCuenta()" id="btnCuenta">
+        @if (usuario.perfil()?.photoUrl) {
+          <img [src]="usuario.perfil()!.photoUrl" alt="" class="avatar">
+        } @else {
+          <span class="avatar avatar-inicial">{{ usuario.primerNombre().charAt(0) || '·' }}</span>
+        }
+        <span class="d-none d-lg-inline">{{ usuario.primerNombre() }}</span>
+        <i class="bi bi-chevron-down small"></i>
+      </button>
+      @if (menuCuenta()) {
+        <div class="menu-cuenta card border-0 shadow-sm">
+          <a routerLink="/cuenta" class="menu-item" (click)="menuCuenta.set(false)"><i class="bi bi-person me-2"></i>Mi cuenta</a>
+          <a routerLink="/cuenta/perfil" class="menu-item" (click)="menuCuenta.set(false)"><i class="bi bi-sliders me-2"></i>Mis preferencias</a>
+          <button type="button" class="menu-item text-start" (click)="salir()" id="btnSalir"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button>
+        </div>
+      }
+    </div>
+  </nav>
+</header>
+
+<main class="app-main container-xl">
+  <router-outlet />
+</main>
+
+<!-- En el celular: barra inferior fija con las cuatro secciones -->
+<nav class="bottom-nav d-md-none" aria-label="Secciones">
+  @for (s of secciones; track s.route) {
+    <a [routerLink]="s.route" routerLinkActive="active" class="bottom-item">
+      <i class="bi {{ s.icon }}"></i>
+      <span>{{ s.label }}</span>
+    </a>
+  }
+</nav>

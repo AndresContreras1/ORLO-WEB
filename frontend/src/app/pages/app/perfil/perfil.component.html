@@ -1,0 +1,91 @@
+<div class="mx-auto" style="max-width: 46rem;">
+  @if (modo() === 'editar') {
+    <a routerLink="/cuenta" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Mi cuenta</a>
+    <h1 class="h3 fw-bold mt-1">Mis preferencias</h1>
+    <p class="text-secondary">Si cambias algo, las próximas recomendaciones lo tienen en cuenta.</p>
+  } @else {
+    <span class="badge bg-accent-soft text-accent mb-2">Paso 1 de 2</span>
+    <h1 class="h3 fw-bold">Cuéntanos un poco de ti</h1>
+    <p class="text-secondary">Así las recomendaciones van contigo. Solo el nombre es obligatorio.</p>
+  }
+
+  @if (!cargando()) {
+    <form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="d-flex flex-column gap-3">
+      <section class="card border-0"><div class="card-body p-4">
+        <label for="name" class="form-label fw-semibold">Nombre</label>
+        <input id="name" class="form-control" formControlName="name"
+               [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+        <div class="form-text">Para saludarte.</div>
+        <app-field-error [control]="form.controls.name" />
+      </div></section>
+
+      <section class="card border-0"><div class="card-body p-4 d-flex flex-column gap-4">
+        <div>
+          <div class="fw-semibold">Rango de edad</div>
+          <div class="form-text mt-0 mb-2">Para que los ejemplos vayan contigo.</div>
+          <app-option-chips formControlName="ageRange" [opciones]="opciones.edades" etiqueta="Rango de edad" />
+        </div>
+        <div>
+          <div class="fw-semibold">¿Cómo prefieres que hablemos de tus prendas?</div>
+          <div class="form-text mt-0 mb-2">Para mostrarte referencias adecuadas.</div>
+          <app-option-chips formControlName="garmentPronoun" [opciones]="opciones.trato" etiqueta="Trato" />
+        </div>
+        <div>
+          <div class="fw-semibold">¿Para qué te vistes la mayoría de los días?</div>
+          <div class="form-text mt-0 mb-2">Puedes elegir varias.</div>
+          <app-option-chips formControlName="occasions" [opciones]="opciones.ocasiones" [multiple]="true" etiqueta="Ocasiones" />
+        </div>
+        <div>
+          <div class="fw-semibold">Clima habitual</div>
+          <div class="form-text mt-0 mb-2">Para sugerirte ropa que vaya con el clima.</div>
+          <app-option-chips formControlName="climate" [opciones]="opciones.climas" etiqueta="Clima" />
+        </div>
+        <div>
+          <div class="fw-semibold">Presupuesto aproximado para ropa</div>
+          <div class="form-text mt-0 mb-2">Para filtrar sugerencias y tiendas. Comprar siempre es opcional.</div>
+          <app-option-chips formControlName="budget" [opciones]="opciones.presupuestos" etiqueta="Presupuesto" />
+        </div>
+      </div></section>
+
+      <section class="card border-0"><div class="card-body p-4">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="consent" formControlName="sensitiveDataConsent">
+          <label class="form-check-label fw-semibold" for="consent">Quiero recomendaciones según mi cuerpo y mis colores</label>
+        </div>
+        <p class="form-text mb-0">Es opcional. Sirve para la lección de colorimetría y para que el asesor sugiera tonos y cortes. Puedes quitarlo cuando quieras y se borran.</p>
+        @if (form.controls.sensitiveDataConsent.value) {
+          <div class="d-flex flex-column gap-4 mt-4">
+            <div>
+              <div class="fw-semibold mb-2">Tu forma (sin medidas)</div>
+              <app-option-chips formControlName="bodyType" [opciones]="opciones.cuerpos" etiqueta="Tipo de cuerpo" />
+            </div>
+            <div>
+              <div class="fw-semibold mb-2">Tono de piel</div>
+              <app-color-swatches formControlName="skinTone" [opciones]="opciones.pieles" etiqueta="Tono de piel" />
+            </div>
+            <div>
+              <div class="fw-semibold mb-2">Color de cabello</div>
+              <app-color-swatches formControlName="hairColor" [opciones]="opciones.cabellos" etiqueta="Color de cabello" />
+            </div>
+            <div>
+              <div class="fw-semibold mb-2">Color de ojos</div>
+              <app-color-swatches formControlName="eyeColor" [opciones]="opciones.ojos" etiqueta="Color de ojos" />
+            </div>
+          </div>
+        }
+      </div></section>
+
+      @if (error()) {
+        <div class="alert alert-danger mb-0">{{ error() }}</div>
+      }
+      <div class="d-flex justify-content-end gap-2">
+        @if (modo() === 'editar') {
+          <a routerLink="/cuenta" class="btn btn-outline-secondary">Cancelar</a>
+        }
+        <button type="submit" class="btn btn-primary btn-lg" id="btnGuardarPerfil" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : (modo() === 'inicial' ? 'Seguir al cuestionario' : 'Guardar') }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

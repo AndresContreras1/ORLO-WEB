@@ -1,0 +1,45 @@
+<main class="min-vh-100 d-flex align-items-center justify-content-center p-3">
+  <div class="card border-0 w-100" style="max-width: 26rem;">
+    <div class="card-body p-4 p-lg-5">
+      <a routerLink="/" class="d-flex align-items-center gap-2 text-decoration-none text-body fw-bold fs-4 mb-3">
+        <img src="logo-simbolo.svg" alt="" width="32" height="32"><span class="wordmark">orlo</span>
+      </a>
+      <h1 class="h4 fw-bold mb-1">Qué bueno verte</h1>
+      <p class="text-secondary small mb-4">Entra con la misma cuenta que usas en la app.</p>
+
+      @if (error()) {
+        <div class="alert alert-danger small" id="errorEntrar">{{ error() }}</div>
+      }
+      @if (aviso()) {
+        <div class="alert alert-light border small">{{ aviso() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="entrar()" novalidate>
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo</label>
+          <input id="email" type="email" class="form-control form-control-lg" formControlName="email" autocomplete="username"
+                 [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid">
+          <app-field-error [control]="form.controls.email" />
+        </div>
+        <div class="mb-2">
+          <label for="password" class="form-label">Contraseña</label>
+          <div class="input-group">
+            <input id="password" [type]="verPassword() ? 'text' : 'password'" class="form-control form-control-lg"
+                   formControlName="password" autocomplete="current-password"
+                   [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid">
+            <button type="button" class="btn btn-outline-secondary" (click)="verPassword.set(!verPassword())"
+                    [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="bi" [class.bi-eye]="!verPassword()" [class.bi-eye-slash]="verPassword()"></i>
+            </button>
+          </div>
+          <app-field-error [control]="form.controls.password" />
+        </div>
+        <button type="button" class="btn btn-link px-0 small mb-3" (click)="recuperar()">Olvidé mi contraseña</button>
+        <button type="submit" class="btn btn-primary btn-lg w-100" id="btnEntrar" [disabled]="enviando()">
+          {{ enviando() ? 'Entrando…' : 'Entrar' }}
+        </button>
+      </form>
+      <p class="text-center small mt-4 mb-0">¿No tienes cuenta? <a routerLink="/registro">Créala aquí</a></p>
+    </div>
+  </div>
+</main>

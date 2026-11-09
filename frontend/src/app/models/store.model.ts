@@ -6,6 +6,8 @@ export interface Store {
   url: string;
   active: boolean;
   affiliate: boolean;
+  /** Categorías de prenda que vende (códigos de CATEGORIAS_PRENDA); sirven para "¿dónde la encuentro?". */
+  categories: string[];
 }
 
 export type StoreRequest = Omit<Store, 'id'>;

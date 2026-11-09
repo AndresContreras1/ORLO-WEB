@@ -1,0 +1,72 @@
+<a routerLink="/armario/prendas" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Mis prendas</a>
+<h2 class="h4 fw-bold mt-1 mb-3">{{ esEdicion ? 'Editar prenda' : 'Agregar prenda' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="row g-4">
+  <div class="col-12 col-lg-5">
+    <div class="card border-0 p-3">
+      <div class="foto-prenda d-flex align-items-center justify-content-center bg-white rounded-3 mb-3" style="aspect-ratio:1/1">
+        @if (vistaPrevia()) {
+          <img [src]="vistaPrevia()" alt="Foto de la prenda" class="w-100 h-100" style="object-fit:contain">
+        } @else {
+          <span class="text-secondary text-center small"><i class="bi bi-image fs-1 d-block mb-1"></i>Sin foto</span>
+        }
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <label class="btn btn-outline-secondary mb-0" for="archivo"><i class="bi bi-upload me-1"></i>Subir foto</label>
+        <input id="archivo" type="file" accept="image/*" capture="environment" class="d-none" (change)="elegirArchivo($event)">
+        <button type="button" class="btn btn-outline-secondary" (click)="camara.set(true)"><i class="bi bi-camera me-1"></i>Usar cámara</button>
+      </div>
+      <p class="small text-secondary mt-2 mb-0">La foto se reduce antes de subirla y solo tú la ves.</p>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <div class="card border-0">
+      <div class="card-body p-4 d-flex flex-column gap-4">
+        <div>
+          <label for="name" class="form-label fw-semibold">Nombre</label>
+          <input id="name" class="form-control" formControlName="name" placeholder="Ej. Jean azul oscuro"
+                 [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+          <app-field-error [control]="form.controls.name" />
+        </div>
+        <div>
+          <div class="fw-semibold mb-2">Categoría</div>
+          <app-option-chips formControlName="category" [opciones]="categorias" etiqueta="Categoría" />
+          @if (form.controls.category.touched && form.controls.category.invalid) {
+            <div class="invalid-feedback d-block">Elige una categoría.</div>
+          }
+        </div>
+        <div>
+          <div class="fw-semibold mb-2">Color principal</div>
+          <app-color-swatches formControlName="color" [opciones]="colores" etiqueta="Color" />
+          @if (form.controls.color.touched && form.controls.color.invalid) {
+            <div class="invalid-feedback d-block">Elige el color.</div>
+          }
+        </div>
+        @if (!esEdicion) {
+          <div>
+            <div class="fw-semibold mb-1">¿Sin foto? Elige una prenda básica</div>
+            <div class="d-flex flex-wrap gap-2">
+              @for (g of genericas; track g.name) {
+                <button type="button" class="btn btn-sm btn-light border rounded-pill" (click)="usarGenerica(g)">{{ g.name }}</button>
+              }
+            </div>
+          </div>
+        }
+        @if (error()) {
+          <div class="alert alert-danger mb-0">{{ error() }}</div>
+        }
+        <div class="d-flex justify-content-end gap-2">
+          <a routerLink="/armario/prendas" class="btn btn-outline-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary" [disabled]="guardando()" id="btnGuardarPrenda">
+            {{ guardando() ? 'Guardando…' : 'Guardar prenda' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+@if (camara()) {
+  <app-camara (foto)="usarFoto($event)" (cancelada)="camara.set(false)" />
+}

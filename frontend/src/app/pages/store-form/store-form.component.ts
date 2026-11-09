@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { FieldErrorComponent } from '../../components/field-error/field-error.component';
 import { LoadStateComponent } from '../../components/load-state/load-state.component';
+import { CATEGORIAS_PRENDA } from '../../models/profile-options';
 import { StoreRequest } from '../../models/store.model';
 import { StoreService } from '../../services/store.service';
 import { errorMessage } from '../../utils/error-message';
@@ -33,6 +34,13 @@ export class StoreFormComponent implements OnInit {
     affiliate: new FormControl(false, { nonNullable: true }),
   });
 
+  readonly categorias = CATEGORIAS_PRENDA;
+  categoriasElegidas = signal<string[]>([]);
+
+  alternarCategoria(codigo: string): void {
+    this.categoriasElegidas.update((c) => (c.includes(codigo) ? c.filter((x) => x !== codigo) : [...c, codigo]));
+  }
+
   get esEdicion(): boolean {
     return !!this.id();
   }
@@ -49,6 +57,7 @@ export class StoreFormComponent implements OnInit {
     this.storeService.findById(Number(this.id())).subscribe({
       next: (store) => {
         this.form.patchValue({ ...store, logoUrl: store.logoUrl ?? '' });
+        this.categoriasElegidas.set(store.categories ?? []);
         this.cargando.set(false);
       },
       error: (err) => {
@@ -64,7 +73,7 @@ export class StoreFormComponent implements OnInit {
       return;
     }
     const raw = this.form.getRawValue();
-    const body: StoreRequest = { ...raw, logoUrl: raw.logoUrl.trim() || null };
+    const body: StoreRequest = { ...raw, logoUrl: raw.logoUrl.trim() || null, categories: this.categoriasElegidas() };
     this.guardando.set(true);
     this.errorGuardar.set(null);
     const peticion = this.esEdicion

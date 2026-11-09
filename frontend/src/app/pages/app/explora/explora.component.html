@@ -1,0 +1,83 @@
+<app-premium-gate funcion="Explora">
+  <div class="mb-3">
+    <h1 class="h2 fw-bold mb-1">Explora</h1>
+    <p class="text-secondary mb-0">Ideas para tu estilo. Primero lo que ya tienes: comprar siempre es opcional.</p>
+  </div>
+
+  <ul class="nav nav-pills gap-2 mb-4 flex-nowrap overflow-auto pb-1" role="tablist">
+    @for (p of pestanas; track p.id) {
+      <li class="nav-item">
+        <button type="button" class="nav-link text-nowrap" [class.active]="pestana() === p.id" (click)="ir(p.id)" role="tab"
+                [attr.aria-selected]="pestana() === p.id">{{ p.label }}</button>
+      </li>
+    }
+  </ul>
+
+  <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+  @switch (pestana()) {
+    @case ('completa') {
+      @if (!cargando() && !error()) {
+        @for (s of sugerencias(); track s.title) {
+          <section class="mb-4">
+            <h2 class="h5 fw-bold mb-1">{{ s.title }}</h2>
+            <p class="text-secondary mb-3">{{ s.reason }}</p>
+            <div class="row g-3">
+              @for (item of s.items; track item.id) {
+                <div class="col-6 col-md-4 col-xl-3">
+                  <ng-container *ngTemplateOutlet="tarjeta; context: { $implicit: item }" />
+                </div>
+              }
+            </div>
+          </section>
+        } @empty {
+          <p class="text-secondary">Tu armario ya tiene un poco de todo. Revisa "Para tu estilo" para más ideas.</p>
+        }
+      }
+    }
+    @case ('guardados') {
+      <div class="row g-3">
+        @for (g of guardados(); track g.itemId) {
+          <div class="col-6 col-md-4 col-xl-3">
+            <a [routerLink]="['/explora/prenda', g.itemId]" class="card border-0 h-100 text-decoration-none text-body">
+              <img [src]="g.imageUrl" [alt]="g.name" class="card-img-top bg-white p-3" style="aspect-ratio:1/1;object-fit:contain" loading="lazy">
+              <div class="card-body pt-0">
+                <div class="fw-semibold">{{ g.name }}</div>
+                <div class="small text-secondary">{{ categoria(g.category) }}</div>
+              </div>
+            </a>
+          </div>
+        } @empty {
+          <p class="text-secondary">Toca el corazón en una prenda para guardarla aquí.</p>
+        }
+      </div>
+    }
+    @default {
+      @if (!cargando() && !error()) {
+        <div class="row g-3">
+          @for (item of items(); track item.id) {
+            <div class="col-6 col-md-4 col-xl-3">
+              <ng-container *ngTemplateOutlet="tarjeta; context: { $implicit: item }" />
+            </div>
+          } @empty {
+            <p class="text-secondary">No hay ideas en esta pestaña por ahora.</p>
+          }
+        </div>
+      }
+    }
+  }
+
+  <ng-template #tarjeta let-item>
+    <a [routerLink]="['/explora/prenda', item.id]" [queryParams]="{ pestana: pestana() }" class="card border-0 h-100 text-decoration-none text-body prenda-card position-relative">
+      <button type="button" class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-2 shadow-sm"
+              (click)="alternarGuardado(item, $event)" [attr.aria-label]="idsGuardados().has(item.id) ? 'Quitar de guardados' : 'Guardar'">
+        <i class="bi" [class.bi-heart-fill]="idsGuardados().has(item.id)" [class.text-accent]="idsGuardados().has(item.id)" [class.bi-heart]="!idsGuardados().has(item.id)"></i>
+      </button>
+      <img [src]="item.imageUrl" [alt]="item.name" class="card-img-top bg-white p-3" style="aspect-ratio:1/1;object-fit:contain" loading="lazy">
+      <div class="card-body pt-0">
+        <div class="fw-semibold">{{ item.name }}</div>
+        <div class="small text-secondary">{{ item.whyItFits }}</div>
+      </div>
+    </a>
+  </ng-template>
+</app-premium-gate>

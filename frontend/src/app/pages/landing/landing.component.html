@@ -1,6 +1,8 @@
 <header class="landing-nav">
   <nav class="container d-flex align-items-center justify-content-between py-3">
-    <a href="#inicio" class="brand text-decoration-none">ORLO</a>
+    <a href="#inicio" class="brand text-decoration-none d-flex align-items-center gap-2">
+      <img src="logo-simbolo.svg" alt="" width="32" height="32"><span class="wordmark">orlo</span>
+    </a>
     <button type="button" class="btn btn-link text-body d-md-none p-1" (click)="alternarMenu()" aria-label="Abrir menú">
       <i class="bi bi-list fs-3"></i>
     </button>
@@ -8,6 +10,7 @@
       <li><a href="#como-funciona" (click)="menuAbierto.set(false)">Cómo funciona</a></li>
       <li><a href="#planes" (click)="menuAbierto.set(false)">Planes</a></li>
       <li><a href="#principios" (click)="menuAbierto.set(false)">Para todos</a></li>
+      <li><a routerLink="/entrar" class="btn btn-outline-secondary btn-sm" id="navEntrar">Entrar</a></li>
     </ul>
   </nav>
 </header>
@@ -22,8 +25,8 @@
           ORLO te ayuda a descubrir tu estilo, combinar mejor tu ropa y aprender a vestirte, sin saber de moda.
         </p>
         <div class="d-flex flex-wrap gap-2">
-          <a href="#como-funciona" class="btn btn-primary btn-lg">Ver cómo funciona</a>
-          <span class="btn btn-lg btn-outline-secondary disabled" aria-disabled="true">Muy pronto en Android</span>
+          <a routerLink="/registro" class="btn btn-primary btn-lg" id="btnEmpezar">Empezar</a>
+          <a routerLink="/entrar" class="btn btn-lg btn-outline-secondary" id="btnYaTengoCuenta">Ya tengo cuenta</a>
         </div>
       </div>
       <div class="col-12 col-lg-6">
@@ -92,7 +95,10 @@
           </tbody>
         </table>
       </div>
-      <p class="text-center small text-secondary mb-0">Premium: $10.000 COP. Puedes cancelar cuando quieras y tus datos se conservan.</p>
+      <p class="text-center small text-secondary mb-0">Premium: $10.000 COP al mes. Puedes cancelar cuando quieras y tus datos se conservan.</p>
+      <div class="text-center mt-4">
+        <a routerLink="/registro" class="btn btn-primary">Crear mi cuenta gratis</a>
+      </div>
     </div>
   </section>
 
@@ -113,7 +119,11 @@
 
 <footer class="border-top py-4">
   <div class="container d-flex flex-wrap justify-content-between gap-2 small text-secondary">
-    <span>&copy; 2026 ORLO</span>
-    <a routerLink="/login" class="text-secondary">Panel del equipo</a>
+    <span>&copy; 2026 ORLO · La misma cuenta en la web y en la app</span>
+    <span class="d-flex gap-3">
+      <a routerLink="/terminos" class="text-secondary">Términos</a>
+      <a routerLink="/privacidad" class="text-secondary">Privacidad</a>
+      <a routerLink="/login" class="text-secondary">Panel del equipo</a>
+    </span>
   </div>
 </footer>

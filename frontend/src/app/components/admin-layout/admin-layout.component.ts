@@ -27,6 +27,7 @@ export class AdminLayoutComponent {
     { label: 'Estilos', icon: 'bi-palette', route: '/admin/styles' },
     { label: 'Cuestionario', icon: 'bi-ui-checks', route: '/admin/quiz' },
     { label: 'Lecciones', icon: 'bi-journal-text', route: '/admin/lessons' },
+    { label: 'Explora', icon: 'bi-compass', route: '/admin/explore' },
     { label: 'Tiendas', icon: 'bi-shop', route: '/admin/stores' },
     { label: 'Asesor IA', icon: 'bi-chat-heart', route: '/admin/ai' },
     { label: 'Usuarios', icon: 'bi-people', route: '/admin/users' },

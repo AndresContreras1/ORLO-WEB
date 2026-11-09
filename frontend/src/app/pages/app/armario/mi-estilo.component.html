@@ -1,0 +1,87 @@
+@if (usuario.resultado(); as r) {
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="card border-0 h-100">
+        <div class="card-body p-4">
+          <div class="small text-secondary text-uppercase fw-semibold">Tu estilo</div>
+          <h2 class="h3 fw-bold mb-1">{{ r.primary.name }}</h2>
+          <p class="text-secondary">con toques de <strong>{{ r.secondary.name }}</strong></p>
+          <p>{{ r.primary.description }}</p>
+          <div class="fw-semibold small mb-2">Tu paleta</div>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            @for (c of r.primary.palette; track c) {
+              <span class="palette-swatch" style="width:2.5rem;height:2.5rem" [style.background]="c" [title]="c"></span>
+            }
+            @for (c of r.secondary.palette; track c) {
+              <span class="palette-swatch opacity-75" style="width:1.75rem;height:1.75rem;align-self:end" [style.background]="c" [title]="c"></span>
+            }
+          </div>
+          @if (r.primary.gallery.length) {
+            <div class="row g-2 mb-3">
+              @for (img of r.primary.gallery.slice(0, 4); track img) {
+                <div class="col-3"><img [src]="img" alt="Inspiración del estilo" class="w-100 rounded-3 bg-white" style="aspect-ratio:1/1;object-fit:cover" loading="lazy"></div>
+              }
+            </div>
+          }
+          <div class="d-flex flex-wrap gap-2">
+            <a routerLink="/explora" class="btn btn-primary">Ver prendas de mi estilo</a>
+            <a routerLink="/cuestionario" class="btn btn-outline-secondary">Repetir el cuestionario</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card border-0 h-100">
+        <div class="card-body p-4">
+          <h3 class="h6 fw-bold">Tu armario en números</h3>
+          <ul class="list-unstyled mb-3">
+            @for (c of porCategoria(); track c.etiqueta) {
+              <li class="d-flex justify-content-between border-bottom py-1 small">
+                <span>{{ c.etiqueta }}</span><span class="fw-semibold" [class.text-danger]="c.total === 0">{{ c.total }}</span>
+              </li>
+            }
+          </ul>
+          @if (coloresTop().length) {
+            <div class="fw-semibold small mb-2">Los colores que más usas</div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              @for (c of coloresTop(); track c.codigo) {
+                <span class="d-inline-flex align-items-center gap-1 small border rounded-pill px-2 py-1 bg-white">
+                  <span class="palette-swatch" style="width:.9rem;height:.9rem" [style.background]="c.hex"></span>{{ c.etiqueta }} · {{ c.total }}
+                </span>
+              }
+            </div>
+          }
+          <a routerLink="/explora" [queryParams]="{ pestana: 'completa' }" class="btn btn-sm btn-outline-secondary">¿Qué le falta a mi armario?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center py-5">
+    <p class="text-secondary">Aún no conoces tu estilo.</p>
+    <a routerLink="/cuestionario" class="btn btn-primary">Hacer el cuestionario</a>
+  </div>
+}
+
+<h3 class="h5 fw-bold mt-5 mb-3">Guardado de Explora</h3>
+<div class="row g-3">
+  @for (g of guardados(); track g.itemId) {
+    <div class="col-6 col-md-4 col-lg-3 col-xxl-2">
+      <div class="card border-0 h-100">
+        <a [routerLink]="['/explora/prenda', g.itemId]">
+          <img [src]="g.imageUrl" [alt]="g.name" class="card-img-top bg-white p-2" style="aspect-ratio:1/1;object-fit:contain" loading="lazy">
+        </a>
+        <div class="card-body p-2 d-flex gap-1 align-items-start">
+          <div class="flex-grow-1">
+            <div class="small fw-semibold">{{ g.name }}</div>
+            <div class="text-secondary" style="font-size:.75rem">{{ nombreCategoria(g.category) }}</div>
+          </div>
+          <button type="button" class="btn btn-sm btn-link p-0 text-secondary" (click)="quitar(g)" aria-label="Quitar de guardados"><i class="bi bi-bookmark-x"></i></button>
+        </div>
+      </div>
+    </div>
+  } @empty {
+    <p class="col-12 text-secondary">Aún no guardas prendas de Explora. Toca <i class="bi bi-bookmark"></i> en las que te gusten.</p>
+  }
+</div>

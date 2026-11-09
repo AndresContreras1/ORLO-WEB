@@ -1,0 +1,63 @@
+<app-premium-gate funcion="Explora">
+  <a routerLink="/explora" [queryParams]="{ pestana: pestana() }" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Explora</a>
+
+  <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+
+  @if (item(); as i) {
+    <div class="row g-4 mt-1">
+      <div class="col-12 col-md-5">
+        <div class="card border-0 p-4">
+          <img [src]="i.imageUrl" [alt]="i.name" class="w-100" style="aspect-ratio:1/1;object-fit:contain">
+        </div>
+        @if (i.imageCredit) {
+          <p class="small text-secondary mt-2 mb-0">Foto: {{ i.imageCredit }}</p>
+        }
+      </div>
+      <div class="col-12 col-md-7">
+        <div class="d-flex align-items-start justify-content-between gap-2">
+          <h1 class="h2 fw-bold mb-1" id="nombrePrenda">{{ i.name }}</h1>
+          <button type="button" class="btn btn-outline-secondary" (click)="alternarGuardado()" [attr.aria-label]="guardada() ? 'Quitar de guardados' : 'Guardar'">
+            <i class="bi" [class.bi-heart-fill]="guardada()" [class.text-accent]="guardada()" [class.bi-heart]="!guardada()"></i>
+          </button>
+        </div>
+        <p class="text-secondary">{{ categoria() }} · {{ color() }}@if (i.trend) { · Tendencia }</p>
+        <p class="lead">{{ i.whyItFits }}</p>
+
+        <div class="d-flex flex-wrap gap-2 my-4">
+          <button type="button" class="btn btn-primary btn-lg" (click)="yaLaTengo.set(true)" id="btnYaLaTengo">
+            <i class="bi bi-check2-circle me-1"></i>Ya la tengo
+          </button>
+          <a routerLink="/explora/tiendas" [queryParams]="{ categoria: i.category }" class="btn btn-link text-secondary" id="btnDondeConseguirla">
+            Dónde conseguirla
+          </a>
+        </div>
+
+        @if (yaLaTengo()) {
+          <section class="card border-0">
+            <div class="card-body p-4">
+              <h2 class="h5 fw-bold">Cómo combinarla</h2>
+              <div class="row g-3">
+                @for (idea of i.combineIdeas; track idea.context) {
+                  <div class="col-12 col-lg-4">
+                    <div class="fw-semibold mb-1">{{ contextos[idea.context] || idea.context }}</div>
+                    <ul class="small mb-0 ps-3">
+                      @for (x of idea.items; track $index) { <li>{{ x }}</li> }
+                    </ul>
+                  </div>
+                }
+              </div>
+              <hr>
+              @if (agregada()) {
+                <span class="text-success"><i class="bi bi-check-circle me-1"></i>Agregada a Mi armario. <a routerLink="/armario/prendas">Ver mis prendas</a></span>
+              } @else {
+                <button type="button" class="btn btn-outline-secondary" (click)="agregarAlArmario()" [disabled]="agregando()" id="btnAgregarArmario">
+                  <i class="bi bi-plus-lg me-1"></i>Agregar a Mi armario
+                </button>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+  }
+</app-premium-gate>

@@ -1,0 +1,1115 @@
+{
+  "info": {
+    "name": "ORLO API",
+    "description": "API de ORLO. La app y la web usan el ID token de Firebase (firebaseToken); el panel usa el JWT de admin (adminToken). Ejecuta primero la carpeta \"0. Tokens\": guarda los dos tokens en las variables de la colección.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8090/api/v1"
+    },
+    {
+      "key": "authEmulator",
+      "value": "http://localhost:9099"
+    },
+    {
+      "key": "firebaseApiKey",
+      "value": "demo-api-key-solo-para-el-emulador"
+    },
+    {
+      "key": "userEmail",
+      "value": "andres.prueba@orlo.test"
+    },
+    {
+      "key": "userPassword",
+      "value": "Prueba2026"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@orlo.co"
+    },
+    {
+      "key": "adminPassword",
+      "value": "OrloAdmin2026"
+    },
+    {
+      "key": "firebaseToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "lessonId",
+      "value": "1"
+    },
+    {
+      "key": "exploreItemId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Tokens",
+      "item": [
+        {
+          "name": "Obtener token de Firebase (emulador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('firebaseToken', pm.response.json().idToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{authEmulator}}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{firebaseApiKey}}",
+              "host": [
+                "{{authEmulator}}"
+              ],
+              "path": [
+                "identitytoolkit.googleapis.com",
+                "v1",
+                "accounts:signInWithPassword"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{firebaseApiKey}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"returnSecureToken\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Entra con una cuenta del seed en el emulador de Authentication y guarda el ID token en firebaseToken."
+          }
+        },
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('adminToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. App y web (Firebase)",
+      "item": [
+        {
+          "name": "Mi estado (premium y mensajes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Estilos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/styles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "styles"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Cuestionario activo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/quiz/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quiz",
+                "active"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Calcular resultado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/quiz/score",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quiz",
+                "score"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": [\n    {\n      \"questionId\": 1,\n      \"optionIds\": [\n        1\n      ]\n    },\n    {\n      \"questionId\": 2,\n      \"optionIds\": [\n        5\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Usa los ids de preguntas y opciones de /quiz/active."
+          }
+        },
+        {
+          "name": "Lecciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lessons"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Detalle de lección",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lessons",
+                "{{lessonId}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Asesor: mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/advisor/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "advisor",
+                "messages"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"¿Qué me pongo para una salida el viernes?\",\n  \"profile\": {\n    \"name\": \"Andrés\",\n    \"ageRange\": \"18_24\",\n    \"garmentPronoun\": \"masculino\",\n    \"primaryStyle\": \"Clásico\",\n    \"secondaryStyle\": \"Urbano\",\n    \"climate\": \"templado\",\n    \"budget\": \"medio\",\n    \"occasions\": [\n      \"estudio\",\n      \"salidas\"\n    ]\n  },\n  \"wardrobe\": [\n    {\n      \"name\": \"Camisa blanca\",\n      \"category\": \"arriba\",\n      \"color\": \"blanco\"\n    },\n    {\n      \"name\": \"Jean azul\",\n      \"category\": \"abajo\",\n      \"color\": \"azul\"\n    },\n    {\n      \"name\": \"Tenis blancos\",\n      \"category\": \"calzado\",\n      \"color\": \"blanco\"\n    }\n  ],\n  \"history\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Asesor: acción rápida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/advisor/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "advisor",
+                "messages"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quickAction\": \"MORE_CASUAL\",\n  \"profile\": {\n    \"name\": \"Andrés\",\n    \"ageRange\": \"18_24\",\n    \"garmentPronoun\": \"masculino\",\n    \"primaryStyle\": \"Clásico\",\n    \"secondaryStyle\": \"Urbano\",\n    \"climate\": \"templado\",\n    \"budget\": \"medio\",\n    \"occasions\": [\n      \"estudio\",\n      \"salidas\"\n    ]\n  },\n  \"wardrobe\": [\n    {\n      \"name\": \"Camisa blanca\",\n      \"category\": \"arriba\",\n      \"color\": \"blanco\"\n    },\n    {\n      \"name\": \"Jean azul\",\n      \"category\": \"abajo\",\n      \"color\": \"azul\"\n    },\n    {\n      \"name\": \"Tenis blancos\",\n      \"category\": \"calzado\",\n      \"color\": \"blanco\"\n    }\n  ],\n  \"history\": [\n    {\n      \"role\": \"USER\",\n      \"text\": \"¿Qué me pongo para una salida el viernes?\"\n    },\n    {\n      \"role\": \"ASSISTANT\",\n      \"text\": \"Camisa blanca con jean azul y tenis blancos.\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Outfit del día",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/advisor/daily-outfit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "advisor",
+                "daily-outfit"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile\": {\n    \"name\": \"Andrés\",\n    \"ageRange\": \"18_24\",\n    \"garmentPronoun\": \"masculino\",\n    \"primaryStyle\": \"Clásico\",\n    \"secondaryStyle\": \"Urbano\",\n    \"climate\": \"templado\",\n    \"budget\": \"medio\",\n    \"occasions\": [\n      \"estudio\",\n      \"salidas\"\n    ]\n  },\n  \"wardrobe\": [\n    {\n      \"name\": \"Camisa blanca\",\n      \"category\": \"arriba\",\n      \"color\": \"blanco\"\n    },\n    {\n      \"name\": \"Jean azul\",\n      \"category\": \"abajo\",\n      \"color\": \"azul\"\n    },\n    {\n      \"name\": \"Tenis blancos\",\n      \"category\": \"calzado\",\n      \"color\": \"blanco\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Máximo 3 al día por persona; no descuenta mensajes del asesor."
+          }
+        },
+        {
+          "name": "Explora: para tu estilo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/explore/items?section=FOR_YOUR_STYLE&style=clasico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "explore",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "section",
+                  "value": "FOR_YOUR_STYLE"
+                },
+                {
+                  "key": "style",
+                  "value": "clasico"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Explora: tendencias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/explore/items?section=TRENDS",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "explore",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "section",
+                  "value": "TRENDS"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Explora: complementos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/explore/items?section=ACCESSORIES",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "explore",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "section",
+                  "value": "ACCESSORIES"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Explora: detalle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/explore/items/{{exploreItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "explore",
+                "items",
+                "{{exploreItemId}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Explora: completar armario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/explore/complete-wardrobe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "explore",
+                "complete-wardrobe"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primaryStyle\": \"clasico\",\n  \"wardrobe\": [\n    {\n      \"name\": \"Camisa blanca\",\n      \"category\": \"arriba\",\n      \"color\": \"blanco\"\n    },\n    {\n      \"name\": \"Jean azul\",\n      \"category\": \"abajo\",\n      \"color\": \"azul\"\n    },\n    {\n      \"name\": \"Tenis blancos\",\n      \"category\": \"calzado\",\n      \"color\": \"blanco\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tiendas por categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stores?category=calzado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stores"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "calzado"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar mi cuenta",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{firebaseToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Borra la cuenta de Authentication y su uso. Antes, la app y la web borran los datos de Firestore y Storage."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Panel (admin)",
+      "item": [
+        {
+          "name": "Métricas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "metrics"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Estilos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/styles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "styles"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Crear estilo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/styles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "styles"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"deportivo\",\n  \"name\": \"Deportivo\",\n  \"description\": \"Cómodo y funcional.\",\n  \"palette\": [\n    \"#1F1F1F\",\n    \"#F7F7F7\",\n    \"#3D5A80\"\n  ],\n  \"gallery\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cuestionario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/quiz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "quiz"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Lecciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "lessons"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Crear lección publicada (envía FCM)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "lessons"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cómo combinar estampados\",\n  \"summary\": \"Mezcla sin miedo.\",\n  \"mainIdea\": \"Un estampado protagonista y el resto liso.\",\n  \"tip\": \"Repite un color del estampado en otra prenda.\",\n  \"order\": 10,\n  \"minutes\": 3,\n  \"coverUrl\": null,\n  \"freeSample\": false,\n  \"usesColorProfile\": false,\n  \"published\": true,\n  \"reviewQuestion\": \"¿Cuántos estampados protagonistas?\",\n  \"reviewOptions\": [\n    \"Uno\",\n    \"Tres\"\n  ],\n  \"reviewCorrectIndex\": 0,\n  \"examples\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Al crear una lección publicada se envía una notificación al tema \"lecciones\" (con ORLO_FCM_ENABLED=true)."
+          }
+        },
+        {
+          "name": "Catálogo de Explora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/explore-items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "explore-items"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Crear prenda de Explora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/explore-items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "explore-items"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camisa de lino\",\n  \"imageUrl\": \"https://cdn.dummyjson.com/product-images/mens-shirts/man-short-sleeve-shirt/thumbnail.webp\",\n  \"imageCredit\": \"DummyJSON\",\n  \"category\": \"arriba\",\n  \"color\": \"blanco\",\n  \"styles\": [\n    \"clasico\",\n    \"minimalista\"\n  ],\n  \"whyItFits\": \"Fresca y fácil de combinar.\",\n  \"trend\": false,\n  \"accessory\": false,\n  \"active\": true,\n  \"combineIdeas\": [\n    {\n      \"context\": \"casual\",\n      \"items\": [\n        \"Jean azul\",\n        \"Tenis blancos\"\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tiendas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/stores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "stores"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Crear tienda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/stores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "stores"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tienda de ejemplo\",\n  \"logoUrl\": null,\n  \"garmentTypes\": \"Básicos, calzado\",\n  \"url\": \"https://example.com\",\n  \"active\": true,\n  \"affiliate\": false,\n  \"categories\": [\n    \"arriba\",\n    \"calzado\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Configuración del asesor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/ai-config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "ai-config"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

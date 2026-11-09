@@ -13,6 +13,15 @@ body {
   color: $orlo-accent;
 }
 
+// Palabra "orlo" junto al símbolo, igual que en la app: minúscula, DM Sans 700
+.wordmark {
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: $orlo-text;
+}
+
 .bg-accent-soft {
   background-color: $orlo-accent-soft;
 }
