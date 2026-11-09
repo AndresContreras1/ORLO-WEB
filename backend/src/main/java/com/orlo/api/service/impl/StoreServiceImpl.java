@@ -1,5 +1,6 @@
 package com.orlo.api.service.impl;
 
+import com.orlo.api.dto.AppStoreDto;
 import com.orlo.api.dto.admin.StoreDto;
 import com.orlo.api.dto.admin.StoreRequest;
 import com.orlo.api.entities.Store;
@@ -9,6 +10,7 @@ import com.orlo.api.service.StoreService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -18,6 +20,17 @@ public class StoreServiceImpl implements StoreService {
 
     public StoreServiceImpl(StoreRepository storeRepository) {
         this.storeRepository = storeRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AppStoreDto> listForApp(String category) {
+        List<Store> active = storeRepository.findAllByOrderByNameAsc().stream().filter(Store::isActive).toList();
+        if (category == null || category.isBlank()) {
+            return active.stream().map(AppStoreDto::from).toList();
+        }
+        List<Store> selling = active.stream().filter(s -> s.getCategories().contains(category.trim())).toList();
+        return (selling.isEmpty() ? active : selling).stream().map(AppStoreDto::from).toList();
     }
 
     @Override
@@ -65,5 +78,6 @@ public class StoreServiceImpl implements StoreService {
         store.setUrl(request.url().trim());
         store.setActive(request.active());
         store.setAffiliate(request.affiliate());
+        store.setCategories(new HashSet<>(request.categoriesOrEmpty()));
     }
 }

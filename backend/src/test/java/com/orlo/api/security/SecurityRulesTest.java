@@ -26,6 +26,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -112,6 +113,13 @@ class SecurityRulesTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uid").value("uid-1"))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void deleteMe_firebaseToken_returns200WithJson() throws Exception {
+        mockMvc.perform(delete("/api/v1/me").header("Authorization", "Bearer token-app"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted").value(true));
     }
 
     @Test

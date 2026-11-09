@@ -9,6 +9,7 @@ import com.orlo.api.repository.AppUserRepository;
 import com.orlo.api.repository.QuizResultRepository;
 import com.orlo.api.security.AppPrincipal;
 import com.orlo.api.service.AppUserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +22,16 @@ public class AppUserServiceImpl implements AppUserService {
     private final AppUserRepository appUserRepository;
     private final AiUsageRepository aiUsageRepository;
     private final QuizResultRepository quizResultRepository;
+    /** Con ORLO_PREMIUM_PARA_TODOS=true todos se tratan como premium (pruebas). El panel sigue viendo el valor real. */
+    private final boolean premiumForEveryone;
 
     public AppUserServiceImpl(AppUserRepository appUserRepository, AiUsageRepository aiUsageRepository,
-                              QuizResultRepository quizResultRepository) {
+                              QuizResultRepository quizResultRepository,
+                              @Value("${app.premium.for-everyone:false}") boolean premiumForEveryone) {
         this.appUserRepository = appUserRepository;
         this.aiUsageRepository = aiUsageRepository;
         this.quizResultRepository = quizResultRepository;
+        this.premiumForEveryone = premiumForEveryone;
     }
 
     @Override
@@ -38,13 +43,13 @@ public class AppUserServiceImpl implements AppUserService {
         if (principal.email() != null) {
             user.setEmail(principal.email());
         }
-        return user.isPremium();
+        return premiumForEveryone || user.isPremium();
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isPremium(String uid) {
-        return appUserRepository.findById(uid).map(AppUser::isPremium).orElse(false);
+        return premiumForEveryone || appUserRepository.findById(uid).map(AppUser::isPremium).orElse(false);
     }
 
     @Override

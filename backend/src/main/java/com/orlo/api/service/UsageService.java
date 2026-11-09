@@ -15,5 +15,8 @@ public interface UsageService {
     /** Devuelve el mensaje reservado cuando el modelo falla: al usuario no se le cobra. */
     void release(String uid);
 
+    /** Cuenta un outfit del día. Lanza LimitReachedException si ya se pidieron todos los de hoy. */
+    void reserveDailyOutfit(String uid, int dailyLimit);
+
     void recordTokens(String uid, String model, long inputTokens, long outputTokens);
 }

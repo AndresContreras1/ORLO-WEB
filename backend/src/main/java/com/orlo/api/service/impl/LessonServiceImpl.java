@@ -11,7 +11,9 @@ import com.orlo.api.exception.BusinessRuleException;
 import com.orlo.api.exception.NotFoundException;
 import com.orlo.api.exception.PremiumRequiredException;
 import com.orlo.api.repository.LessonRepository;
+import com.orlo.api.service.LessonPublishedEvent;
 import com.orlo.api.service.LessonService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +24,11 @@ import java.util.List;
 public class LessonServiceImpl implements LessonService {
 
     private final LessonRepository lessonRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public LessonServiceImpl(LessonRepository lessonRepository) {
+    public LessonServiceImpl(LessonRepository lessonRepository, ApplicationEventPublisher eventPublisher) {
         this.lessonRepository = lessonRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -61,15 +65,24 @@ public class LessonServiceImpl implements LessonService {
     public AdminLessonDto create(LessonRequest request) {
         Lesson lesson = new Lesson();
         apply(lesson, request);
-        return AdminLessonDto.from(lessonRepository.save(lesson));
+        Lesson saved = lessonRepository.save(lesson);
+        if (saved.isPublished()) {
+            eventPublisher.publishEvent(new LessonPublishedEvent(saved.getId(), saved.getTitle()));
+        }
+        return AdminLessonDto.from(saved);
     }
 
     @Override
     @Transactional
     public AdminLessonDto update(Long id, LessonRequest request) {
         Lesson lesson = load(id);
+        boolean wasPublished = lesson.isPublished();
         apply(lesson, request);
         lessonRepository.flush();
+        // Solo se avisa cuando pasa de oculta a publicada, no en cada edición
+        if (!wasPublished && lesson.isPublished()) {
+            eventPublisher.publishEvent(new LessonPublishedEvent(lesson.getId(), lesson.getTitle()));
+        }
         return AdminLessonDto.from(lesson);
     }
 

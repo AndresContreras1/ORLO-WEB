@@ -1,7 +1,10 @@
 package com.orlo.api.entities;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,6 +12,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /** Tienda sugerida del catálogo manual. */
 @Entity
@@ -39,6 +45,12 @@ public class Store {
 
     @Column(nullable = false)
     private boolean affiliate;
+
+    /** Categorías de prenda que vende (códigos de CatalogCodes): sirven para "Dónde conseguirla". */
+    @ElementCollection
+    @CollectionTable(name = "store_categories", joinColumns = @JoinColumn(name = "store_id"))
+    @Column(name = "category", nullable = false, length = 20)
+    private Set<String> categories = new HashSet<>();
 
     public Store(String name, String logoUrl, String garmentTypes, String url) {
         this.name = name;

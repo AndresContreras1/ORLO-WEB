@@ -1,0 +1,13 @@
+{
+  "name": "orlo-functions",
+  "description": "Cloud Functions de ORLO: integridad de los datos de cada usuario",
+  "main": "index.js",
+  "private": true,
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.5.0",
+    "firebase-functions": "^6.4.0"
+  }
+}

@@ -26,6 +26,8 @@ Requisitos: Java 17 o superior, Docker y Firebase CLI (`npm i -g firebase-tools`
    | `DATABASE_URL`, `DB_USER`, `DB_PASSWORD` | Conexión a PostgreSQL | `jdbc:postgresql://localhost:5433/orlo`, `orlo`, `orlo_dev` |
    | `ORLO_CORS_ORIGINS` | Orígenes permitidos (panel web) | `http://localhost:4200` |
    | `FIREBASE_AUTH_EMULATOR_HOST` | Emulador de Auth | `localhost:9099` |
+   | `ORLO_PREMIUM_PARA_TODOS` | Todos se tratan como premium (pruebas). Ponla en `false` para ver el bloqueo premium | `true` (en `prod`, `false`) |
+   | `ORLO_FCM_ENABLED` | Enviar la notificación de lección nueva por FCM | `false` (en `prod`, `true`) |
 
 4. Arrancar:
    ```bash
@@ -33,7 +35,21 @@ Requisitos: Java 17 o superior, Docker y Firebase CLI (`npm i -g firebase-tools`
    ```
    Queda en `http://localhost:8090`. La documentación interactiva está en `http://localhost:8090/swagger-ui.html`.
 
-Al arrancar, Flyway crea el esquema y `DataLoader` carga datos de ejemplo una sola vez: 8 estilos con paleta, un cuestionario de 10 preguntas con su tabla de puntos, 6 lecciones (la primera es la muestra gratis), 5 tiendas, la configuración del asesor y el administrador.
+Al arrancar, Flyway crea el esquema y `DataLoader` carga datos de ejemplo una sola vez: 8 estilos con paleta, un cuestionario de 10 preguntas con su tabla de puntos, 6 lecciones (la primera es la muestra gratis), 5 tiendas con sus categorías, 47 prendas reales en el catálogo de Explora, la configuración del asesor y el administrador. Las galerías de los estilos, las opciones del cuestionario y las lecciones usan esas mismas fotos de ropa (`CatalogoDeEjemplo`). Para volver a cargar todo desde cero: `docker compose down -v` y arrancar de nuevo.
+
+Endpoints principales (detalle en Swagger y en [`../docs/modelo-de-datos.md`](../docs/modelo-de-datos.md)):
+
+| App (token de Firebase) | Panel (JWT de admin) |
+|---|---|
+| `GET/DELETE /api/v1/me` | `POST /api/v1/admin/auth/login` |
+| `GET /api/v1/styles` | CRUD `/api/v1/admin/styles`, `/quiz`, `/lessons`, `/stores`, `/explore-items` |
+| `GET /api/v1/quiz/active` · `POST /api/v1/quiz/score` | `GET/PUT /api/v1/admin/ai-config` |
+| `GET /api/v1/lessons` · `GET /api/v1/lessons/{id}` | `GET /api/v1/admin/users` · `PUT /api/v1/admin/users/{uid}/premium` |
+| `POST /api/v1/advisor/messages` · `POST /api/v1/advisor/daily-outfit` | `GET /api/v1/admin/metrics` |
+| `GET /api/v1/explore/items` · `GET /api/v1/explore/items/{id}` · `POST /api/v1/explore/complete-wardrobe` | |
+| `GET /api/v1/stores` | |
+
+Al publicar una lección (crearla publicada o pasarla de oculta a publicada) se envía una notificación FCM al tema `lecciones`, después de guardar. En desarrollo FCM está apagado y solo queda en el log.
 
 ## Pruebas
 

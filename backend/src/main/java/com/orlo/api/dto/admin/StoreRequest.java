@@ -1,8 +1,11 @@
 package com.orlo.api.dto.admin;
 
+import com.orlo.api.entities.CatalogCodes;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public record StoreRequest(
         @NotBlank(message = "El nombre es obligatorio") @Size(max = 100) String name,
@@ -12,5 +15,10 @@ public record StoreRequest(
         @Pattern(regexp = "https?://.+", message = "El enlace debe empezar por http:// o https://")
         @Size(max = 500) String url,
         boolean active,
-        boolean affiliate) {
+        boolean affiliate,
+        List<@Pattern(regexp = CatalogCodes.CATEGORY_REGEX, message = "Categoría no válida") String> categories) {
+
+    public List<String> categoriesOrEmpty() {
+        return categories == null ? List.of() : categories;
+    }
 }

@@ -56,6 +56,18 @@ public class UsageServiceImpl implements UsageService {
 
     @Override
     @Transactional
+    public void reserveDailyOutfit(String uid, int dailyLimit) {
+        LocalDate day = today();
+        AiUsage usage = aiUsageRepository.findForUpdate(uid, day)
+                .orElseGet(() -> aiUsageRepository.save(new AiUsage(uid, day)));
+        if (usage.getDailyOutfits() >= dailyLimit) {
+            throw new LimitReachedException(dailyLimit);
+        }
+        usage.setDailyOutfits(usage.getDailyOutfits() + 1);
+    }
+
+    @Override
+    @Transactional
     public void release(String uid) {
         aiUsageRepository.findForUpdate(uid, today())
                 .filter(u -> u.getMessages() > 0)

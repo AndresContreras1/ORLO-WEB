@@ -1,0 +1,13 @@
+{
+  "name": "orlo-seed",
+  "description": "Carga usuarios de prueba con perfil, resultado, prendas reales, outfits y conversaciones en Firebase",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "firebase-admin": "^13.5.0"
+  }
+}

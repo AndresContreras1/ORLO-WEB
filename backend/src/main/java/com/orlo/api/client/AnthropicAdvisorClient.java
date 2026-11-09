@@ -82,6 +82,38 @@ public class AnthropicAdvisorClient implements AdvisorAiClient {
         }
     }
 
+    @Override
+    public DailyAnswer dailyOutfit(AiQuestion question) {
+        if (client == null) {
+            throw new AiUnavailableException("El asesor no está disponible en este momento");
+        }
+        StructuredMessageCreateParams.Builder<ModelOutfit> builder = MessageCreateParams.builder()
+                .model(question.model())
+                .maxTokens(question.maxOutputTokens())
+                .system(question.systemPrompt())
+                .outputConfig(ModelOutfit.class);
+        for (AiTurn turn : question.turns()) {
+            if (turn.fromUser()) {
+                builder.addUserMessage(turn.text());
+            } else {
+                builder.addAssistantMessage(turn.text());
+            }
+        }
+        try {
+            StructuredMessage<ModelOutfit> message = client.messages().create(builder.build());
+            ModelOutfit outfit = message.content().stream()
+                    .flatMap(block -> block.text().stream())
+                    .map(text -> text.text())
+                    .findFirst()
+                    .orElseThrow(() -> new AiUnavailableException("El asesor no devolvió el outfit del día"));
+            return new DailyAnswer(new AiOutfit(outfit.title(), outfit.items() == null ? List.of() : outfit.items(),
+                    outfit.why()), message.usage().inputTokens(), message.usage().outputTokens());
+        } catch (AnthropicException e) {
+            log.error("Falló el outfit del día con el modelo {}", question.model(), e);
+            throw new AiUnavailableException("El asesor no está disponible en este momento. Intenta de nuevo");
+        }
+    }
+
     /** Forma del JSON que se le pide al modelo. */
     record ModelOutput(
             @JsonPropertyDescription("Respuesta corta y cercana para la persona, en español, sin jerga de moda")

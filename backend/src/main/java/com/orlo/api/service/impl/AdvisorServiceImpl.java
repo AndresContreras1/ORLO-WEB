@@ -4,10 +4,13 @@ import com.orlo.api.client.AdvisorAiClient;
 import com.orlo.api.client.AdvisorAiClient.AiAnswer;
 import com.orlo.api.client.AdvisorAiClient.AiQuestion;
 import com.orlo.api.client.AdvisorAiClient.AiTurn;
+import com.orlo.api.client.AdvisorAiClient.DailyAnswer;
 import com.orlo.api.dto.AdvisorMessageRequest;
 import com.orlo.api.dto.AdvisorProfile;
 import com.orlo.api.dto.AdvisorReplyDto;
 import com.orlo.api.dto.ChatRole;
+import com.orlo.api.dto.DailyOutfitDto;
+import com.orlo.api.dto.DailyOutfitRequest;
 import com.orlo.api.dto.HistoryItem;
 import com.orlo.api.dto.OutfitDto;
 import com.orlo.api.dto.QuickAction;
@@ -19,6 +22,7 @@ import com.orlo.api.service.AdvisorService;
 import com.orlo.api.service.AiConfigService;
 import com.orlo.api.service.AppUserService;
 import com.orlo.api.service.UsageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,14 +39,41 @@ public class AdvisorServiceImpl implements AdvisorService {
     private final UsageService usageService;
     private final AiConfigService aiConfigService;
     private final AdvisorAiClient aiClient;
+    private final int dailyOutfitLimit;
 
     public AdvisorServiceImpl(AppUserService appUserService, UsageService usageService,
-                              AiConfigService aiConfigService, AdvisorAiClient aiClient) {
+                              AiConfigService aiConfigService, AdvisorAiClient aiClient,
+                              @Value("${app.advisor.daily-outfit-limit:3}") int dailyOutfitLimit) {
         this.appUserService = appUserService;
         this.usageService = usageService;
         this.aiConfigService = aiConfigService;
         this.aiClient = aiClient;
+        this.dailyOutfitLimit = dailyOutfitLimit;
     }
+
+    @Override
+    public DailyOutfitDto dailyOutfit(AppPrincipal principal, DailyOutfitRequest request) {
+        if (!appUserService.registerVisit(principal)) {
+            throw new PremiumRequiredException();
+        }
+        usageService.reserveDailyOutfit(principal.uid(), dailyOutfitLimit);
+        AiConfigDto config = aiConfigService.get();
+        AdvisorMessageRequest asMessage = new AdvisorMessageRequest(DAILY_OUTFIT_QUESTION, null, request.profile(),
+                request.wardrobeOrEmpty(), List.of());
+        String system = buildSystemPrompt(config.systemPrompt(), asMessage) + DAILY_OUTFIT_RULES;
+        DailyAnswer answer = aiClient.dailyOutfit(new AiQuestion(config.model(), system, config.maxOutputTokens(),
+                List.of(new AiTurn(true, DAILY_OUTFIT_QUESTION))));
+        usageService.recordTokens(principal.uid(), config.model(), answer.inputTokens(), answer.outputTokens());
+        return new DailyOutfitDto(answer.outfit().title(), answer.outfit().items(), answer.outfit().why());
+    }
+
+    static final String DAILY_OUTFIT_QUESTION = "¿Qué me pongo hoy?";
+
+    static final String DAILY_OUTFIT_RULES = "\n## Outfit del día\n"
+            + "Propón un solo outfit para hoy, pensado para el clima y las ocasiones del perfil. "
+            + "Usa primero las prendas que ya tiene, con el nombre tal como aparece en la lista. "
+            + "Si no tiene prendas registradas, propón un outfit sencillo con prendas básicas. "
+            + "En \"why\" explica en una o dos líneas por qué funciona.\n";
 
     @Override
     public AdvisorReplyDto ask(AppPrincipal principal, AdvisorMessageRequest request) {

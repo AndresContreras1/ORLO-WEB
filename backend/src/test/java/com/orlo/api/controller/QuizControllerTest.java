@@ -76,6 +76,24 @@ class QuizControllerTest {
     }
 
     @Test
+    void score_idsAsText_areReadAsNumbers() throws Exception {
+        // La app maneja los ids como String y los manda como texto en el JSON
+        StyleDto urbano = new StyleDto(2L, "urbano", "Urbano", "desc", List.of("#000000"), List.of());
+        StyleDto casual = new StyleDto(1L, "casual", "Casual", "desc", List.of("#FFFFFF"), List.of());
+        var esperado = new QuizScoreRequest(List.of(new QuizAnswerRequest(3L, List.of(10L, 11L))));
+        when(appUserService.registerVisit(any())).thenReturn(false);
+        when(quizService.score(eq("uid-1"), eq(false), eq(esperado)))
+                .thenReturn(new QuizScoreResponse(urbano, casual, Map.of("urbano", 5, "casual", 2)));
+
+        mockMvc.perform(post("/api/v1/quiz/score")
+                        .header("Authorization", "Bearer token-app")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"answers\":[{\"questionId\":\"3\",\"optionIds\":[\"10\",\"11\"]}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.primary.code").value("urbano"));
+    }
+
+    @Test
     void score_emptyAnswers_returns400WithFieldError() throws Exception {
         mockMvc.perform(post("/api/v1/quiz/score")
                         .header("Authorization", "Bearer token-app")

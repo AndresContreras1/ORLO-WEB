@@ -13,3 +13,9 @@ frontend/.angular/
 *.iml
 .DS_Store
 .env
+# Firebase
+firebase/**/node_modules/
+firebase/*.log
+firebase/**/firebase-debug.log
+firebase/.tmp/
+firebase/firebase.prueba.json

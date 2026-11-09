@@ -1,0 +1,85 @@
+rules_version = '2';
+
+// Reglas compartidas por la app móvil, la web de usuarios y el backend.
+// Cada usuario solo lee y escribe su propio documento y sus subcolecciones: nadie lee los datos de
+// otro. El contenido (estilos, cuestionario, lecciones, catálogo de Explora) no está en Firestore:
+// lo sirve el backend. Lo que mantiene el servidor (garmentsCount) no lo puede escribir un cliente.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function esElDueno(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // El cliente no puede crear ni cambiar campos que mantiene una Cloud Function
+    function noTocaCamposDelServidor() {
+      return !('garmentsCount' in request.resource.data)
+        || (resource != null && 'garmentsCount' in resource.data
+            && request.resource.data.garmentsCount == resource.data.garmentsCount);
+    }
+
+    match /users/{userId} {
+      allow read, delete: if esElDueno(userId);
+      // El nombre es obligatorio y corto; nunca se guarda correo ni contraseña
+      allow create, update: if esElDueno(userId)
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 40
+        && !('email' in request.resource.data)
+        && !('password' in request.resource.data)
+        && (!('photoUrl' in request.resource.data) || request.resource.data.photoUrl is string)
+        && noTocaCamposDelServidor();
+
+      match /results/{resultId} {
+        allow read, write: if esElDueno(userId);
+      }
+
+      match /lessonProgress/{lessonId} {
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId)
+          && request.resource.data.status in ['sin_empezar', 'en_curso', 'completada'];
+      }
+
+      match /garments/{garmentId} {
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 40
+          && request.resource.data.category in ['arriba', 'abajo', 'abrigo', 'calzado', 'accesorio', 'otro'];
+      }
+
+      match /outfits/{outfitId} {
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 40
+          && request.resource.data.favorite is bool;
+      }
+
+      match /conversations/{conversationId} {
+        allow read, write: if esElDueno(userId);
+
+        match /messages/{messageId} {
+          allow read, delete: if esElDueno(userId);
+          allow create: if esElDueno(userId)
+            && request.resource.data.role in ['user', 'assistant'];
+        }
+      }
+
+      // Guardados de Explora: el id del documento es el id de la prenda del catálogo
+      match /saved/{itemId} {
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId)
+          && request.resource.data.itemId is number
+          && request.resource.data.name is string;
+      }
+
+      // Outfit del día: el id del documento es la fecha (AAAA-MM-DD)
+      match /dailyOutfits/{fecha} {
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId)
+          && fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && request.resource.data.title is string;
+      }
+    }
+  }
+}
