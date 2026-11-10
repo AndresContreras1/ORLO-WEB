@@ -2,8 +2,14 @@ import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { ApplicationConfig, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import {
+  browserLocalPersistence,
+  connectAuthEmulator,
+  indexedDBLocalPersistence,
+  initializeAuth,
+  provideAuth,
+} from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { connectStorageEmulator, getStorage, provideStorage } from '@angular/fire/storage';
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
@@ -28,7 +34,9 @@ export const appConfig: ApplicationConfig = {
     // Firebase (externo al vault): la misma cuenta y los mismos datos que la app móvil
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
-      const auth = getAuth();
+      // initializeAuth sin popupRedirectResolver: la web solo usa correo y contraseña. Así Firebase no
+      // carga el iframe ni el script de Google para inicio con popup, y la CSP no tiene que permitirlos.
+      const auth = initializeAuth(getApp(), { persistence: [indexedDBLocalPersistence, browserLocalPersistence] });
       if (emu) {
         connectAuthEmulator(auth, `http://${emu.host}:${emu.auth}`, { disableWarnings: true });
       }

@@ -37,9 +37,11 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     @Transactional
     public boolean registerVisit(AppPrincipal principal) {
-        AppUser user = appUserRepository.findById(principal.uid())
-                .orElseGet(() -> appUserRepository.save(new AppUser(principal.uid(), principal.email())));
-        user.setLastSeenAt(Instant.now());
+        Instant now = Instant.now();
+        // insertIfMissing y no findById + save: dos peticiones simultáneas de un usuario nuevo daban 500
+        appUserRepository.insertIfMissing(principal.uid(), principal.email(), now);
+        AppUser user = appUserRepository.findById(principal.uid()).orElseThrow();
+        user.setLastSeenAt(now);
         if (principal.email() != null) {
             user.setEmail(principal.email());
         }

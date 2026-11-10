@@ -4,6 +4,9 @@ rules_version = '2';
 // Cada usuario solo lee y escribe su propio documento y sus subcolecciones: nadie lee los datos de
 // otro. El contenido (estilos, cuestionario, lecciones, catálogo de Explora) no está en Firestore:
 // lo sirve el backend. Lo que mantiene el servidor (garmentsCount) no lo puede escribir un cliente.
+//
+// Cada documento acepta solo los campos del contrato (docs/modelo-de-datos.md), con su tipo y un
+// tamaño máximo. Así un cliente modificado no puede guardar campos inventados ni textos enormes.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -11,57 +14,141 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    function datos() {
+      return request.resource.data;
+    }
+
+    function soloCampos(campos) {
+      return datos().keys().hasOnly(campos);
+    }
+
+    function texto(valor, max) {
+      return valor is string && valor.size() <= max;
+    }
+
+    // Campo que puede faltar o venir en null (Kotlin escribe null; la web lo omite)
+    function faltaONulo(campo) {
+      return !(campo in datos()) || datos()[campo] == null;
+    }
+
+    function textoOpcional(campo, max) {
+      return faltaONulo(campo) || texto(datos()[campo], max);
+    }
+
+    function lista(valor, max) {
+      return valor is list && valor.size() <= max;
+    }
+
+    function esFecha(valor) {
+      return valor is number;
+    }
+
+    // Solo enlaces http(s): nada de javascript: ni data:
+    function enlace(valor) {
+      return texto(valor, 2048) && valor.matches('^https?://[^ ]+$');
+    }
+
+    function enlaceOpcional(campo) {
+      return faltaONulo(campo) || enlace(datos()[campo]);
+    }
+
+    // Estilo = copia de StyleDto de la API
+    function esEstilo(e) {
+      return e is map
+        && e.keys().hasOnly(['id', 'code', 'name', 'description', 'palette', 'gallery'])
+        && texto(e.code, 40) && texto(e.name, 80) && texto(e.description, 1000)
+        && lista(e.palette, 20) && lista(e.gallery, 20);
+    }
+
+    // Resultado = {id, primary, secondary, createdAt}
+    function esResultado(r) {
+      return r is map
+        && r.keys().hasOnly(['id', 'primary', 'secondary', 'createdAt'])
+        && texto(r.id, 128) && esEstilo(r.primary) && esEstilo(r.secondary) && esFecha(r.createdAt);
+    }
+
     // El cliente no puede crear ni cambiar campos que mantiene una Cloud Function
     function noTocaCamposDelServidor() {
-      return !('garmentsCount' in request.resource.data)
+      return !('garmentsCount' in datos())
         || (resource != null && 'garmentsCount' in resource.data
-            && request.resource.data.garmentsCount == resource.data.garmentsCount);
+            && datos().garmentsCount == resource.data.garmentsCount);
     }
 
     match /users/{userId} {
       allow read, delete: if esElDueno(userId);
       // El nombre es obligatorio y corto; nunca se guarda correo ni contraseña
       allow create, update: if esElDueno(userId)
-        && request.resource.data.name is string
-        && request.resource.data.name.size() <= 40
-        && !('email' in request.resource.data)
-        && !('password' in request.resource.data)
-        && (!('photoUrl' in request.resource.data) || request.resource.data.photoUrl is string)
+        && soloCampos(['name', 'ageRange', 'garmentPronoun', 'bodyType', 'skinTone', 'hairColor', 'eyeColor',
+                       'climate', 'budget', 'occasions', 'sensitiveDataConsent', 'currentResult', 'photoUrl',
+                       'garmentsCount', 'acceptedTermsAt', 'createdAt'])
+        && texto(datos().name, 40)
+        && textoOpcional('ageRange', 40) && textoOpcional('garmentPronoun', 40) && textoOpcional('bodyType', 40)
+        && textoOpcional('skinTone', 40) && textoOpcional('hairColor', 40) && textoOpcional('eyeColor', 40)
+        && textoOpcional('climate', 40) && textoOpcional('budget', 40)
+        && (faltaONulo('occasions') || lista(datos().occasions, 10))
+        && (faltaONulo('sensitiveDataConsent') || datos().sensitiveDataConsent is bool)
+        && (faltaONulo('currentResult') || esResultado(datos().currentResult))
+        && enlaceOpcional('photoUrl')
+        && (faltaONulo('acceptedTermsAt') || esFecha(datos().acceptedTermsAt))
+        && (faltaONulo('createdAt') || esFecha(datos().createdAt))
         && noTocaCamposDelServidor();
 
       match /results/{resultId} {
-        allow read, write: if esElDueno(userId);
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId) && esResultado(datos());
       }
 
       match /lessonProgress/{lessonId} {
         allow read, delete: if esElDueno(userId);
         allow create, update: if esElDueno(userId)
-          && request.resource.data.status in ['sin_empezar', 'en_curso', 'completada'];
+          && soloCampos(['lessonId', 'status', 'updatedAt'])
+          && datos().lessonId is number
+          && datos().status in ['sin_empezar', 'en_curso', 'completada']
+          && esFecha(datos().updatedAt);
       }
 
       match /garments/{garmentId} {
         allow read, delete: if esElDueno(userId);
         allow create, update: if esElDueno(userId)
-          && request.resource.data.name is string
-          && request.resource.data.name.size() <= 40
-          && request.resource.data.category in ['arriba', 'abajo', 'abrigo', 'calzado', 'accesorio', 'otro'];
+          && soloCampos(['name', 'category', 'color', 'photoUrl', 'favorite', 'createdAt'])
+          && texto(datos().name, 40)
+          && datos().category in ['arriba', 'abajo', 'abrigo', 'calzado', 'accesorio', 'otro']
+          && texto(datos().color, 20)
+          && enlaceOpcional('photoUrl')
+          && (faltaONulo('favorite') || datos().favorite is bool)
+          && esFecha(datos().createdAt);
       }
 
       match /outfits/{outfitId} {
         allow read, delete: if esElDueno(userId);
         allow create, update: if esElDueno(userId)
-          && request.resource.data.name is string
-          && request.resource.data.name.size() <= 40
-          && request.resource.data.favorite is bool;
+          && soloCampos(['name', 'occasion', 'garmentIds', 'itemsText', 'why', 'origin', 'favorite', 'createdAt'])
+          && texto(datos().name, 40)
+          && texto(datos().occasion, 20)
+          && lista(datos().garmentIds, 30)
+          && lista(datos().itemsText, 30)
+          && texto(datos().why, 2000)
+          && datos().origin in ['asesor', 'manual']
+          && datos().favorite is bool
+          && esFecha(datos().createdAt);
       }
 
       match /conversations/{conversationId} {
-        allow read, write: if esElDueno(userId);
+        allow read, delete: if esElDueno(userId);
+        allow create, update: if esElDueno(userId)
+          && soloCampos(['title', 'updatedAt'])
+          && texto(datos().title, 200)
+          && esFecha(datos().updatedAt);
 
         match /messages/{messageId} {
           allow read, delete: if esElDueno(userId);
           allow create: if esElDueno(userId)
-            && request.resource.data.role in ['user', 'assistant'];
+            && soloCampos(['role', 'text', 'outfits', 'followUpQuestion', 'createdAt'])
+            && datos().role in ['user', 'assistant']
+            && texto(datos().text, 20000)
+            && (faltaONulo('outfits') || lista(datos().outfits, 10))
+            && textoOpcional('followUpQuestion', 1000)
+            && esFecha(datos().createdAt);
         }
       }
 
@@ -69,8 +156,12 @@ service cloud.firestore {
       match /saved/{itemId} {
         allow read, delete: if esElDueno(userId);
         allow create, update: if esElDueno(userId)
-          && request.resource.data.itemId is number
-          && request.resource.data.name is string;
+          && soloCampos(['itemId', 'name', 'imageUrl', 'category', 'savedAt'])
+          && datos().itemId is number
+          && texto(datos().name, 120)
+          && (datos().imageUrl == '' || enlace(datos().imageUrl))
+          && texto(datos().category, 20)
+          && esFecha(datos().savedAt);
       }
 
       // Outfit del día: el id del documento es la fecha (AAAA-MM-DD)
@@ -78,7 +169,11 @@ service cloud.firestore {
         allow read, delete: if esElDueno(userId);
         allow create, update: if esElDueno(userId)
           && fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-          && request.resource.data.title is string;
+          && soloCampos(['title', 'items', 'why', 'createdAt'])
+          && texto(datos().title, 200)
+          && lista(datos().items, 20)
+          && texto(datos().why, 2000)
+          && datos().createdAt is number;
       }
     }
   }

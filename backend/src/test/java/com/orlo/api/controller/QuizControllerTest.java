@@ -105,6 +105,20 @@ class QuizControllerTest {
     }
 
     @Test
+    void score_tooManyAnswers_returns400() throws Exception {
+        String answers = java.util.stream.IntStream.rangeClosed(1, 51)
+                .mapToObj(i -> "{\"questionId\":" + i + ",\"optionIds\":[1]}")
+                .collect(java.util.stream.Collectors.joining(","));
+
+        mockMvc.perform(post("/api/v1/quiz/score")
+                        .header("Authorization", "Bearer token-app")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"answers\":[" + answers + "]}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION"));
+    }
+
+    @Test
     void active_withoutToken_returns401() throws Exception {
         mockMvc.perform(get("/api/v1/quiz/active"))
                 .andExpect(status().isUnauthorized())

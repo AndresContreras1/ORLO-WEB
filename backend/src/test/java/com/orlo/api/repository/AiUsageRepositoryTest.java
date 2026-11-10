@@ -3,6 +3,7 @@ package com.orlo.api.repository;
 import com.orlo.api.entities.AiUsage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -12,6 +13,8 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+// Usa la H2 del perfil test (modo PostgreSQL) y no la embebida por defecto: así entiende ON CONFLICT
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 class AiUsageRepositoryTest {
 
@@ -35,6 +38,16 @@ class AiUsageRepositoryTest {
     void sums_noRows_returnZero() {
         assertThat(aiUsageRepository.sumMessages()).isZero();
         assertThat(aiUsageRepository.sumCost()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    void insertIfMissing_twice_keepsOneRowInZero() {
+        aiUsageRepository.insertIfMissing("uid-1", DAY);
+        aiUsageRepository.insertIfMissing("uid-1", DAY);
+
+        assertThat(aiUsageRepository.count()).isEqualTo(1);
+        assertThat(aiUsageRepository.findByUidAndUsageDate("uid-1", DAY))
+                .hasValueSatisfying(u -> assertThat(u.getMessages()).isZero());
     }
 
     @Test

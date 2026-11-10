@@ -1,5 +1,6 @@
 package com.orlo.api.dto.admin;
 
+import com.orlo.api.dto.Urls;
 import com.orlo.api.dto.CombineIdeaDto;
 import com.orlo.api.entities.CatalogCodes;
 import jakarta.validation.Valid;
@@ -12,7 +13,8 @@ import java.util.List;
 
 public record ExploreItemRequest(
         @NotBlank(message = "El nombre es obligatorio") @Size(max = 80) String name,
-        @NotBlank(message = "La imagen es obligatoria") @Size(max = 500) String imageUrl,
+        @NotBlank(message = "La imagen es obligatoria") @Size(max = 500)
+        @Pattern(regexp = Urls.WEB_REGEX, message = Urls.MESSAGE) String imageUrl,
         @Size(max = 200) String imageCredit,
         @NotBlank @Pattern(regexp = CatalogCodes.CATEGORY_REGEX, message = "Categoría no válida") String category,
         @NotBlank @Pattern(regexp = CatalogCodes.COLOR_REGEX, message = "Color no válido") String color,

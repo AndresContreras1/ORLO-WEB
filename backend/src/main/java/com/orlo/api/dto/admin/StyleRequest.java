@@ -1,5 +1,6 @@
 package com.orlo.api.dto.admin;
 
+import com.orlo.api.dto.Urls;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -14,5 +15,6 @@ public record StyleRequest(
         @NotBlank(message = "La descripción es obligatoria") @Size(max = 1000) String description,
         @NotEmpty(message = "Agrega al menos un color")
         List<@Pattern(regexp = "#[0-9A-Fa-f]{6}", message = "Cada color va en formato #RRGGBB") String> palette,
-        List<@NotBlank @Size(max = 500) String> gallery) {
+        @Size(max = 20, message = "Máximo 20 imágenes")
+        List<@NotBlank @Size(max = 500) @Pattern(regexp = Urls.WEB_REGEX, message = Urls.MESSAGE) String> gallery) {
 }

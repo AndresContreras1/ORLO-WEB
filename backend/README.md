@@ -63,10 +63,10 @@ Las pruebas usan el perfil `test` (H2 en memoria, sin Flyway) y no necesitan Doc
 
 | Carpeta | Qué prueba | Herramienta |
 |---|---|---|
-| `repository/` | Consultas propias | `@DataJpaTest` |
-| `service/` | Reglas de negocio (puntaje del cuestionario, premium, límite del asesor) | Mockito |
-| `controller/` | Contrato HTTP, validación, códigos de error | `@WebMvcTest` + MockMvc |
-| `security/` | 401 sin token, 403 sin rol, tokens alterados, token de la app en el panel | `@WebMvcTest` |
+| `repository/` | Consultas propias y altas sin duplicados (`ON CONFLICT`) | `@DataJpaTest` |
+| `service/` | Reglas de negocio (puntaje del cuestionario, premium, límite del asesor, bloqueo de intentos de login) | Mockito |
+| `controller/` | Contrato HTTP, validación, códigos de error, sexto login fallido → 429 | `@WebMvcTest` + MockMvc |
+| `security/` | 401 sin token, 403 sin rol, tokens alterados, sin vencimiento o de otro emisor, límite por usuario (429), cuerpo de más de 1 MB (413), cabeceras | `@WebMvcTest` |
 | `arquitectura/` | Capas, controladores sin repositorios ni entidades | ArchUnit |
 
 ## Arquitectura
@@ -114,4 +114,14 @@ Perfil `prod` (`--spring.profiles.active=prod`): toda la configuración llega po
 - **Salud**: `GET /actuator/health` es público y responde `{"status":"UP"}`; el resto de Actuator no se expone.
 - **Detrás del proxy del hosting**: `server.forward-headers-strategy=framework` respeta `X-Forwarded-*`.
 - **Recursos en prod**: `THREADS` (hilos de Tomcat, 50) y `DB_POOL` (conexiones a la base, 5), pensados para el plan gratis.
+- **Protección contra abuso** (`application.properties`, en memoria porque corre una sola instancia):
+
+  | Propiedad | Valor | Qué hace |
+  |---|---|---|
+  | `app.http.max-body-bytes` | 1048576 | Cuerpo máximo de una petición; más grande responde 413 |
+  | `app.rate-limit.requests-per-minute` | 120 | Peticiones por minuto de un mismo usuario; más responde 429 con `Retry-After` |
+  | `app.login.max-attempts-per-ip` / `app.login.ip-window` | 10 / `PT5M` | Intentos de login del panel por IP |
+  | `app.login.max-failures` / `app.login.lock-duration` | 5 / `PT15M` | Fallos seguidos que bloquean la cuenta del panel y por cuánto tiempo |
+
+- Seguridad completa, pruebas de ataque y de carga: [`../docs/seguridad.md`](../docs/seguridad.md).
 - Despliegue en Render paso a paso: [`../docs/despliegue-render.md`](../docs/despliegue-render.md).
