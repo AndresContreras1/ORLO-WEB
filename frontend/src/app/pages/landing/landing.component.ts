@@ -30,14 +30,6 @@ export class LandingComponent {
     { icon: 'bi-grid-3x3-gap', title: 'Organiza tu armario', text: 'Guarda tus prendas y los outfits que te funcionaron para no perderlos.' },
   ];
 
-  readonly principios: string[] = [
-    'Ningún estilo es mejor que otro: casual, urbano, deportivo, clásico o formal.',
-    'Te orientamos, no te imponemos. Tú decides.',
-    'Palabras simples. Si hay un término técnico, lo explicamos en una línea.',
-    'Primero usamos lo que ya tienes. Comprar es opcional.',
-    'Los cuerpos no se juzgan.',
-  ];
-
   readonly plan: PlanRow[] = [
     { label: 'Cuestionario y resultado de tu estilo', free: true, premium: true },
     { label: 'Galería de referencias', free: true, premium: true },

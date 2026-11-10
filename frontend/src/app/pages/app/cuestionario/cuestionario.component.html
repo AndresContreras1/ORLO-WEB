@@ -1,46 +1,102 @@
 <div class="mx-auto" style="max-width: 60rem;">
-  <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
+  @if (modo() === 'preguntas') {
+    <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
 
-  @if (pregunta(); as p) {
-    <div class="d-flex align-items-center gap-3 mb-2">
-      <button type="button" class="btn btn-link text-secondary px-0" (click)="anterior()" [disabled]="indice() === 0"
-              aria-label="Pregunta anterior" id="btnAtras">
-        <i class="bi bi-arrow-left fs-5"></i>
-      </button>
-      <div class="flex-grow-1">
-        <div class="progress" style="height: .5rem;" role="progressbar" [attr.aria-valuenow]="progreso()" aria-valuemin="0" aria-valuemax="100"
-             [attr.aria-label]="'Pregunta ' + (indice() + 1) + ' de ' + total()">
-          <div class="progress-bar" [style.width.%]="progreso()"></div>
+    @if (pregunta(); as p) {
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <button type="button" class="btn btn-link text-secondary px-0" (click)="anterior()" [disabled]="indice() === 0"
+                aria-label="Pregunta anterior" id="btnAtras">
+          <i class="bi bi-arrow-left fs-5"></i>
+        </button>
+        <div class="flex-grow-1">
+          <div class="progress" style="height: .5rem;" role="progressbar" [attr.aria-valuenow]="progreso()" aria-valuemin="0" aria-valuemax="100"
+               [attr.aria-label]="'Pregunta ' + (indice() + 1) + ' de ' + total()">
+            <div class="progress-bar" [style.width.%]="progreso()"></div>
+          </div>
         </div>
+        <span class="small text-secondary">{{ indice() + 1 }} de {{ total() }}</span>
       </div>
-      <span class="small text-secondary">{{ indice() + 1 }} de {{ total() }}</span>
-    </div>
 
-    <h1 class="h3 fw-bold mt-4 mb-1">{{ p.text }}</h1>
-    <p class="text-secondary mb-4">{{ p.helpText || (p.multiple ? 'Puedes elegir varias' : 'Elige una') }}. No hay respuestas correctas.</p>
+      <h1 class="h3 fw-bold mt-4 mb-1">{{ p.text }}</h1>
+      <p class="text-secondary mb-4">{{ p.helpText || (p.multiple ? 'Puedes elegir varias' : 'Elige una') }}. No hay respuestas correctas.</p>
+
+      <div class="row g-3">
+        @for (o of p.options; track o.id) {
+          <div class="col-6 col-md-4 col-lg-3">
+            <button type="button" class="opcion card w-100 h-100 p-0 text-start" [class.elegida]="elegidas().includes(o.id)"
+                    [attr.aria-pressed]="elegidas().includes(o.id)" (click)="elegir(o.id)">
+              @if (o.imageUrl) {
+                <img [src]="o.imageUrl" [alt]="o.text" class="opcion-img" loading="lazy">
+              }
+              <span class="d-flex align-items-center justify-content-between gap-2 p-3">
+                <span class="fw-semibold">{{ o.text }}</span>
+                <i class="bi" [class.bi-check-circle-fill]="elegidas().includes(o.id)" [class.bi-circle]="!elegidas().includes(o.id)"></i>
+              </span>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4">
+        <button type="button" class="btn btn-link text-secondary px-0" (click)="saltar()" [disabled]="calculando()" id="btnSaltar">
+          Saltar el cuestionario
+        </button>
+        <button type="button" class="btn btn-primary btn-lg" (click)="siguiente()" [disabled]="elegidas().length === 0 || calculando()"
+                id="btnSiguiente">
+          {{ calculando() ? 'Calculando tu estilo…' : (esUltima() ? 'Ver mi estilo' : 'Siguiente') }}
+        </button>
+      </div>
+    }
+  } @else {
+    <button type="button" class="btn btn-link text-secondary px-0 mb-2" (click)="volverAPreguntas()" id="btnVolverPreguntas">
+      <i class="bi bi-arrow-left me-1"></i>Volver a las preguntas
+    </button>
+
+    <h1 class="h3 fw-bold mt-2 mb-1">Elige tu estilo</h1>
+    <p class="text-secondary mb-4">
+      Toca primero el estilo que más va contigo y después otro que también te guste.
+      El cuestionario lo puedes hacer cuando quieras desde Mi armario → Mi estilo.
+    </p>
+
+    <app-load-state [loading]="cargandoEstilos()" [error]="errorEstilos()" (retry)="cargarEstilos()" />
 
     <div class="row g-3">
-      @for (o of p.options; track o.id) {
+      @for (s of estilos(); track s.id) {
         <div class="col-6 col-md-4 col-lg-3">
-          <button type="button" class="opcion card w-100 h-100 p-0 text-start" [class.elegida]="elegidas().includes(o.id)"
-                  [attr.aria-pressed]="elegidas().includes(o.id)" (click)="elegir(o.id)">
-            @if (o.imageUrl) {
-              <img [src]="o.imageUrl" [alt]="o.text" class="opcion-img" loading="lazy">
+          <button type="button" class="opcion card w-100 h-100 p-0 text-start" [class.elegida]="posicion(s) >= 0"
+                  [attr.aria-pressed]="posicion(s) >= 0" (click)="elegirEstilo(s)">
+            @if (portadas()[s.id]; as foto) {
+              <img [src]="foto" [alt]="s.name" class="opcion-img" loading="lazy">
             }
-            <span class="d-flex align-items-center justify-content-between gap-2 p-3">
-              <span class="fw-semibold">{{ o.text }}</span>
-              <i class="bi" [class.bi-check-circle-fill]="elegidas().includes(o.id)" [class.bi-circle]="!elegidas().includes(o.id)"></i>
+            <span class="d-block p-3">
+              <span class="d-flex align-items-center justify-content-between gap-2">
+                <span class="fw-semibold">{{ s.name }}</span>
+                @if (posicion(s) === 0) {
+                  <span class="badge bg-accent-soft text-accent">Principal</span>
+                } @else if (posicion(s) === 1) {
+                  <span class="badge bg-accent-soft text-accent">Secundario</span>
+                } @else {
+                  <i class="bi bi-circle"></i>
+                }
+              </span>
+              <span class="d-flex gap-1 mt-2">
+                @for (c of s.palette.slice(0, 4); track $index) {
+                  <span class="palette-swatch" [style.background]="c"></span>
+                }
+              </span>
             </span>
           </button>
         </div>
       }
     </div>
 
-    <div class="d-flex justify-content-end mt-4">
-      <button type="button" class="btn btn-primary btn-lg" (click)="siguiente()" [disabled]="elegidas().length === 0 || calculando()"
-              id="btnSiguiente">
-        {{ calculando() ? 'Calculando tu estilo…' : (esUltima() ? 'Ver mi estilo' : 'Siguiente') }}
-      </button>
-    </div>
+    @if (estilos().length) {
+      <div class="d-flex justify-content-end mt-4">
+        <button type="button" class="btn btn-primary btn-lg" (click)="verEstiloElegido()" [disabled]="eleccion().length < 2"
+                id="btnVerEstiloElegido">
+          {{ textoVerEstilo() }}
+        </button>
+      </div>
+    }
   }
 </div>

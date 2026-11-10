@@ -42,7 +42,7 @@ Antes de desplegar, cambia en `src/environments/environment.ts` el `apiUrl` por 
 | Sección | Qué se hace |
 |---|---|
 | Bienvenida | Página pública con Empezar (registro) y Ya tengo cuenta |
-| Primeros pasos | Registro con aceptación de términos, perfil inicial (datos de apariencia solo con consentimiento), cuestionario, resultado y oferta Premium |
+| Primeros pasos | Registro con aceptación de términos, perfil inicial (datos de apariencia solo con consentimiento), cuestionario (o saltarlo eligiendo el estilo principal y uno secundario de la lista), resultado y oferta Premium |
 | Inicio | Saludo, outfit del día (máximo 3 al día), avance de Aprende y accesos |
 | Aprende | Lecciones con su avance en tiempo real; colorimetría con la paleta de la persona |
 | Asesor | Chat con la IA que guarda las conversaciones en Firestore; acciones rápidas y guardar outfits |
