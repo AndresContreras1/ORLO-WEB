@@ -9,7 +9,6 @@
     <ul class="nav-links list-unstyled d-md-flex align-items-center gap-4 mb-0" [class.open]="menuAbierto()">
       <li><a href="#como-funciona" (click)="menuAbierto.set(false)">Cómo funciona</a></li>
       <li><a href="#planes" (click)="menuAbierto.set(false)">Planes</a></li>
-      <li><a href="#principios" (click)="menuAbierto.set(false)">Para todos</a></li>
       <li><a routerLink="/entrar" class="btn btn-outline-secondary btn-sm" id="navEntrar">Entrar</a></li>
     </ul>
   </nav>
@@ -19,10 +18,9 @@
   <section class="hero container">
     <div class="row align-items-center g-5">
       <div class="col-12 col-lg-6">
-        <span class="badge bg-accent-soft text-accent mb-3">Tu asesor de imagen en el celular</span>
         <h1 class="display-5 fw-bold mb-3">Cuéntanos cómo te vistes.<br>Te ayudamos con el resto.</h1>
         <p class="lead text-secondary mb-4">
-          ORLO te ayuda a descubrir tu estilo, combinar mejor tu ropa y aprender a vestirte, sin saber de moda.
+          ORLO te ayuda a descubrir tu estilo, combinar mejor tu ropa y aprender a vestirte.
         </p>
         <div class="d-flex flex-wrap gap-2">
           <a routerLink="/registro" class="btn btn-primary btn-lg" id="btnEmpezar">Empezar</a>
@@ -51,7 +49,7 @@
   <section id="como-funciona" class="py-5">
     <div class="container">
       <h2 class="h3 fw-bold text-center mb-2">Cómo funciona</h2>
-      <p class="text-secondary text-center mb-5">Cuatro cosas en un solo lugar. Sin jerga de moda.</p>
+      <p class="text-secondary text-center mb-5">Cuatro cosas en un solo lugar.</p>
       <div class="row g-4">
         @for (f of features; track f.title) {
           <div class="col-12 col-sm-6 col-lg-3">
@@ -99,20 +97,6 @@
       <div class="text-center mt-4">
         <a routerLink="/registro" class="btn btn-primary">Crear mi cuenta gratis</a>
       </div>
-    </div>
-  </section>
-
-  <section id="principios" class="py-5">
-    <div class="container" style="max-width: 48rem;">
-      <h2 class="h3 fw-bold text-center mb-4">Para todas las personas</h2>
-      <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
-        @for (p of principios; track p) {
-          <li class="d-flex gap-3 align-items-start">
-            <i class="bi bi-heart text-accent fs-5"></i>
-            <span>{{ p }}</span>
-          </li>
-        }
-      </ul>
     </div>
   </section>
 </main>
