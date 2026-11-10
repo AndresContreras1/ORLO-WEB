@@ -25,7 +25,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional(readOnly = true)
     public List<AppStoreDto> listForApp(String category) {
-        List<Store> active = storeRepository.findAllByOrderByNameAsc().stream().filter(Store::isActive).toList();
+        List<Store> active = storeRepository.findByActiveTrueOrderByNameAsc();
         if (category == null || category.isBlank()) {
             return active.stream().map(AppStoreDto::from).toList();
         }

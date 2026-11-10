@@ -51,6 +51,8 @@ Los valores hexadecimales de las paletas de piel, cabello y ojos son los de `Opc
 
 En `garments`, `outfits`, `conversations` y `messages` el id es el del documento: no se guarda como campo. Al leer se toma `doc.id` (en Angular, `idField: 'id'`).
 
+`photoUrl` (prenda y perfil) es la URL de descarga de Storage con `&v=<milisegundos>` al final, para que una foto nueva no se muestre desde la caché.
+
 ### Códigos de prendas
 
 | Lista | Códigos |

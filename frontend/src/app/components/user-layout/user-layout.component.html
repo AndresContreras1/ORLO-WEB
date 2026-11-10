@@ -33,6 +33,12 @@
 </header>
 
 <main class="app-main container-xl">
+  @if (usuario.errorMe(); as error) {
+    <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 mt-3" role="alert">
+      <span class="flex-grow-1">{{ error }}</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="usuario.cargarMe()">Reintentar</button>
+    </div>
+  }
   <router-outlet />
 </main>
 

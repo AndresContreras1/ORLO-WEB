@@ -7,7 +7,8 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8090/api/v1"
+      "value": "http://localhost:8090/api/v1",
+      "description": "Local: http://localhost:8090/api/v1 · Render: https://orlo-api.onrender.com/api/v1"
     },
     {
       "key": "authEmulator",
@@ -31,7 +32,8 @@
     },
     {
       "key": "adminPassword",
-      "value": "OrloAdmin2026"
+      "value": "",
+      "description": "La de ORLO_ADMIN_PASSWORD (backend/.env en local, variable de entorno en Render)"
     },
     {
       "key": "firebaseToken",

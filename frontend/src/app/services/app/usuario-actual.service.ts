@@ -4,6 +4,7 @@ import { Observable, of, switchMap } from 'rxjs';
 
 import { Me } from '../../models/app-api.model';
 import { PrendaDoc, UsuarioDoc } from '../../models/firestore.model';
+import { errorMessage } from '../../utils/error-message';
 import { ArmarioService } from './armario.service';
 import { ContenidoService } from './contenido.service';
 import { PerfilService } from './perfil.service';
@@ -39,8 +40,15 @@ export class UsuarioActualService {
   /** Mientras no se sepa, no se bloquea nada (el backend vuelve a validar en cada petición). */
   readonly premium = computed(() => this.meSignal()?.premium ?? true);
 
+  /** Mensaje para la persona si no se pudo consultar su estado en el servidor. */
+  readonly errorMe = signal<string | null>(null);
+
   cargarMe(): void {
-    this.contenido.me().subscribe({ next: (me) => this.meSignal.set(me), error: () => undefined });
+    this.errorMe.set(null);
+    this.contenido.me().subscribe({
+      next: (me) => this.meSignal.set(me),
+      error: (err) => this.errorMe.set(errorMessage(err)),
+    });
   }
 
   actualizarMensajesRestantes(restantes: number): void {

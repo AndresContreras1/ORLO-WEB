@@ -8,7 +8,8 @@ export function errorMessage(error: unknown): string {
     return 'Algo salió mal. Intenta de nuevo.';
   }
   if (error.status === 0) {
-    return 'No hay conexión con el servidor. Revisa que el backend esté encendido.';
+    // Sin respuesta: sin internet, CORS o el servidor despertando (el plan gratis se duerme tras 15 min)
+    return 'No pudimos conectar con el servidor. Revisa tu internet e intenta de nuevo en un momento.';
   }
   const problem = error.error as Problem | null;
   if (problem?.errors && Object.keys(problem.errors).length > 0) {

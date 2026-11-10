@@ -17,6 +17,7 @@ import { Observable, map } from 'rxjs';
 
 import { EstiloDoc, PerfilCampos, ProgresoLeccionDoc, ResultadoDoc, UsuarioDoc, EstadoLeccion } from '../../models/firestore.model';
 import { StyleDto } from '../../models/app-api.model';
+import { ignorarSiNoExiste } from '../../utils/storage';
 import { FirebaseBase } from './firebase-base';
 
 const USERS = 'users';
@@ -98,7 +99,8 @@ export class PerfilService extends FirebaseBase {
     return this.ctx(async () => {
       const archivo = ref(this.storage, `profileImages/${uid}.jpg`);
       await uploadBytes(archivo, foto, { contentType: 'image/jpeg' });
-      const url = await getDownloadURL(archivo);
+      // &v= evita que el navegador muestre la foto anterior desde caché (igual que la app)
+      const url = `${await getDownloadURL(archivo)}&v=${Date.now()}`;
       await setDoc(doc(this.db, USERS, uid), { photoUrl: url }, { merge: true });
       return url;
     });
@@ -143,8 +145,8 @@ export class PerfilService extends FirebaseBase {
         await batch.commit();
       }
       await Promise.all([
-        ...idsDePrendas.map((id) => deleteObject(ref(this.storage, `garmentImages/${uid}/${id}.jpg`)).catch(() => undefined)),
-        deleteObject(ref(this.storage, `profileImages/${uid}.jpg`)).catch(() => undefined),
+        ...idsDePrendas.map((id) => deleteObject(ref(this.storage, `garmentImages/${uid}/${id}.jpg`)).catch(ignorarSiNoExiste)),
+        deleteObject(ref(this.storage, `profileImages/${uid}.jpg`)).catch(ignorarSiNoExiste),
       ]);
       const batch = writeBatch(this.db);
       batch.delete(usuarioRef);

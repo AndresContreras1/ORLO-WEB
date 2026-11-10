@@ -61,7 +61,10 @@ export class ExploreItemFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.styleService.findAll().subscribe({ next: (data) => this.estilos.set(data), error: () => undefined });
+    this.styleService.findAll().subscribe({
+      next: (data) => this.estilos.set(data),
+      error: (err) => this.errorCarga.set(errorMessage(err)),
+    });
     if (this.esEdicion) {
       this.cargar();
     }
