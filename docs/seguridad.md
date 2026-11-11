@@ -16,6 +16,7 @@ Qué protege a la API, a la web y a Firebase, cómo se probó y qué falta por h
 | Errores | `application/problem+json` con un `code`, sin trazas, sin mensajes de la base y sin decir por qué falló un token |
 | Cabeceras | CSP `default-src 'none'; frame-ancestors 'none'`, `nosniff`, `X-Frame-Options: DENY`, `Cache-Control: no-store` y `Referrer-Policy: no-referrer`. Con HTTPS, también HSTS |
 | Superficie | CORS solo para el dominio de la web. De Actuator solo se expone `/actuator/health`. Swagger está apagado en producción |
+| Respuestas de la IA | La salida estructurada no admite `maxLength`, así que el backend recorta lo que devuelve el modelo antes de entregarlo: título ≤ 40, `why` ≤ 1000, máximo 10 prendas de 120 caracteres y 3 outfits. Así nada choca con las reglas de Firestore, aunque un cliente no recorte |
 | Concurrencia | El alta del usuario y el contador diario del asesor usan `INSERT … ON CONFLICT DO NOTHING`: dos peticiones simultáneas de un usuario nuevo ya no chocan (antes daban 500) |
 
 Todo se configura en `application.properties` (`app.http.*`, `app.rate-limit.*`, `app.login.*`). Los contadores viven en memoria porque la API corre en una sola instancia.
@@ -43,7 +44,7 @@ Todo se configura en `application.properties` (`app.http.*`, `app.rate-limit.*`,
 
 | Prueba | Cómo correrla | Qué cubre |
 |---|---|---|
-| Backend | `./mvnw verify` (90 pruebas) | Tokens alterados, vencidos, sin `exp` o de otro emisor. Sexto login fallido → 429. Límite por usuario. Cuerpo de más de 1 MB → 413. Cabeceras. Enlaces `javascript:`. Listas enormes. Alta concurrente sin duplicados |
+| Backend | `./mvnw verify` (94 pruebas) | Tokens alterados, vencidos, sin `exp` o de otro emisor. Sexto login fallido → 429. Límite por usuario. Cuerpo de más de 1 MB → 413. Cabeceras. Enlaces `javascript:`. Listas enormes. Alta concurrente sin duplicados |
 | Reglas de Firebase | `node --test pruebas/reglas.test.mjs` en `firebase/`, con los emuladores (31 pruebas) | Documentos válidos de la web y de la app. Ataques a Firestore y Storage |
 
 **Ataques en local** contra la API, los emuladores y producción (solo lectura en producción): 108 casos, todos bloqueados después de las correcciones. Entre ellos:

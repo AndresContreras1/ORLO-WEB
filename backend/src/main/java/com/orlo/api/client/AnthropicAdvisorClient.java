@@ -26,6 +26,14 @@ public class AnthropicAdvisorClient implements AdvisorAiClient {
 
     private static final Logger log = LoggerFactory.getLogger(AnthropicAdvisorClient.class);
 
+    // Topes de lo que devuelve el modelo, alineados con firestore.rules (docs/modelo-de-datos.md)
+    static final int MAX_TITLE = 40;
+    static final int MAX_WHY = 1000;
+    static final int MAX_ITEMS = 10;
+    static final int MAX_ITEM = 120;
+    static final int MAX_OUTFITS = 3;
+    static final int MAX_FOLLOW_UP = 500;
+
     private final AnthropicClient client;
 
     public AnthropicAdvisorClient(@Value("${app.ai.api-key:}") String apiKey,
@@ -70,10 +78,11 @@ public class AnthropicAdvisorClient implements AdvisorAiClient {
                     .findFirst()
                     .orElseThrow(() -> new AiUnavailableException("El asesor no devolvió una respuesta. Intenta de nuevo"));
             List<AiOutfit> outfits = output.outfits() == null ? List.of() : output.outfits().stream()
-                    .map(o -> new AiOutfit(o.title(), o.items() == null ? List.of() : o.items(), o.why()))
+                    .limit(MAX_OUTFITS)
+                    .map(AnthropicAdvisorClient::aOutfit)
                     .toList();
             String followUp = output.followUpQuestion() == null || output.followUpQuestion().isBlank()
-                    ? null : output.followUpQuestion();
+                    ? null : recortar(output.followUpQuestion(), MAX_FOLLOW_UP);
             return new AiAnswer(output.reply(), outfits, followUp,
                     message.usage().inputTokens(), message.usage().outputTokens());
         } catch (AnthropicException e) {
@@ -106,12 +115,34 @@ public class AnthropicAdvisorClient implements AdvisorAiClient {
                     .map(text -> text.text())
                     .findFirst()
                     .orElseThrow(() -> new AiUnavailableException("El asesor no devolvió el outfit del día"));
-            return new DailyAnswer(new AiOutfit(outfit.title(), outfit.items() == null ? List.of() : outfit.items(),
-                    outfit.why()), message.usage().inputTokens(), message.usage().outputTokens());
+            return new DailyAnswer(aOutfit(outfit), message.usage().inputTokens(), message.usage().outputTokens());
         } catch (AnthropicException e) {
             log.error("Falló el outfit del día con el modelo {}", question.model(), e);
             throw new AiUnavailableException("El asesor no está disponible en este momento. Intenta de nuevo");
         }
+    }
+
+    /**
+     * Pasa el outfit del modelo a la forma de la API con los topes que exigen las reglas de Firestore
+     * (outfits.name ≤ 40, why ≤ 2000, listas cortas). La salida estructurada no admite maxLength, así
+     * que el tope va en la descripción del esquema y se asegura aquí: ningún cliente depende de recortar.
+     */
+    static AiOutfit aOutfit(ModelOutfit outfit) {
+        List<String> items = outfit.items() == null ? List.of() : outfit.items().stream()
+                .filter(item -> item != null && !item.isBlank())
+                .limit(MAX_ITEMS)
+                .map(item -> recortar(item, MAX_ITEM))
+                .toList();
+        return new AiOutfit(recortar(outfit.title(), MAX_TITLE), items, recortar(outfit.why(), MAX_WHY));
+    }
+
+    /** Recorta sin partir un emoji (par sustituto de UTF-16) y sin dejar espacios al final. */
+    static String recortar(String texto, int max) {
+        if (texto == null || texto.length() <= max) {
+            return texto;
+        }
+        int fin = Character.isHighSurrogate(texto.charAt(max - 1)) ? max - 1 : max;
+        return texto.substring(0, fin).stripTrailing();
     }
 
     /** Forma del JSON que se le pide al modelo. */
@@ -125,7 +156,7 @@ public class AnthropicAdvisorClient implements AdvisorAiClient {
     }
 
     record ModelOutfit(
-            @JsonPropertyDescription("Nombre corto del outfit") String title,
+            @JsonPropertyDescription("Nombre corto del outfit, de máximo 40 caracteres") String title,
             @JsonPropertyDescription("Prendas del outfit, priorizando las que la persona ya tiene") List<String> items,
             @JsonPropertyDescription("Por qué funciona, en una o dos líneas") String why) {
     }
