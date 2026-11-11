@@ -12,13 +12,14 @@ import {
 } from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { connectStorageEmulator, getStorage, provideStorage } from '@angular/fire/storage';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { appAuthInterceptor } from './interceptors/app-auth.interceptor';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { errorInterceptor } from './interceptors/error.interceptor';
+import { esCelular, transicionMovil } from './utils/navegacion-movil';
 
 // Fechas y números en español de Colombia
 registerLocaleData(localeEsCo);
@@ -28,7 +29,12 @@ const emu = environment.emulators;
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withComponentInputBinding(), withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
+      ...(esCelular() ? [withViewTransitions({ skipInitialTransition: true, onViewTransitionCreated: transicionMovil })] : []),
+    ),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor, appAuthInterceptor, errorInterceptor])),
     { provide: LOCALE_ID, useValue: 'es-CO' },
     // Firebase (externo al vault): la misma cuenta y los mismos datos que la app móvil

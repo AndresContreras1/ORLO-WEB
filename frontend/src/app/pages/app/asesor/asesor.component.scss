@@ -92,3 +92,90 @@
     }
   }
 }
+
+// En el celular: chat a pantalla completa, como Mensajes en iOS
+@media (max-width: 767.98px) {
+  .asesor {
+    height: calc(100dvh - 2.75rem - env(safe-area-inset-top) - var(--ios-tabbar) - env(safe-area-inset-bottom));
+    min-height: 0;
+  }
+
+  .chat {
+    --bs-card-bg: transparent;
+    --bs-card-border-radius: 0;
+    --bs-card-inner-border-radius: 0;
+  }
+
+  .chat-header {
+    min-height: 2.75rem;
+    border-bottom: .5px solid var(--ios-separator);
+    font-size: .9375rem;
+
+    .small {
+      font-size: .75rem;
+      white-space: nowrap;
+    }
+  }
+
+  .burbuja {
+    max-width: 85%;
+    padding: .5rem .85rem;
+    border-radius: 1.125rem;
+  }
+
+  .usuario {
+    background: var(--ios-tint);
+    border-bottom-right-radius: .3rem;
+  }
+
+  .asesor-msg {
+    background: #E9E9EB;
+    border-bottom-left-radius: .3rem;
+  }
+
+  .entrada {
+    align-items: center;
+    padding: .5rem .75rem !important;
+    border-top: .5px solid var(--ios-separator);
+    background: var(--ios-bar);
+
+    .form-control {
+      min-height: 2.25rem;
+      padding: .35rem .9rem;
+      border: .5px solid var(--ios-separator);
+      border-radius: 1.125rem;
+    }
+
+    .btn {
+      flex: 0 0 2.25rem;
+      width: 2.25rem;
+      min-height: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      border-radius: 50%;
+    }
+  }
+
+  .aviso-ia {
+    padding: 0 .75rem .4rem !important;
+    background: var(--ios-bar);
+    font-size: .6875rem !important;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  // Lista de conversaciones: hoja que sube desde abajo, encima de la barra de pestañas
+  .conversaciones.abierta {
+    inset: auto 0 0 0;
+    max-height: 70vh;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-radius: .875rem .875rem 0 0;
+    animation: subir .3s cubic-bezier(.32, .72, 0, 1);
+  }
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(100%);
+  }
+}

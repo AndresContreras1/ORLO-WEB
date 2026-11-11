@@ -90,6 +90,11 @@ src/
   - Contraseña de 8 a 128 caracteres con confirmación.
   - Aviso si el dominio del correo parece mal escrito (`utils/correo.ts`: `gmil.com` → `gmail.com`), también al fallar el login.
 - Firebase Auth se inicia con `initializeAuth` sin popup ni redirect (solo correo y contraseña), así la CSP no tiene que permitir iframes ni scripts de Google.
+- En el celular (menos de 768 px) la web de usuarios se ve como una app de iOS; en el computador no cambia:
+  - `src/styles/_movil.scss` tiene el estilo: tipografía, colores, botones, campos, control segmentado, hoja de acciones y transiciones. El panel `/admin` no entra.
+  - `user-layout` muestra la barra de navegación (flecha de volver, título que aparece al desplazar) y la barra de pestañas.
+  - `utils/navegacion-movil.ts` decide qué pantallas son pestañas y la dirección de la animación.
+  - Es instalable: `public/manifest.webmanifest` y `apple-touch-icon.png` permiten "Agregar a pantalla de inicio".
 - En Render, `render.yaml` agrega CSP, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy`. El build no incrusta CSS crítico con `onload`, porque la CSP lo bloquearía. Si la web llama a un dominio nuevo, hay que agregarlo en `connect-src`.
 
 ## Cambiar el diseño

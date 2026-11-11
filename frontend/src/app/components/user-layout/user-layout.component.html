@@ -1,4 +1,4 @@
-<header class="app-header">
+<header class="app-header d-none d-md-block">
   <nav class="container-xl d-flex align-items-center gap-4 py-2">
     <a routerLink="/inicio" class="brand text-decoration-none d-flex align-items-center gap-2" aria-label="ORLO, ir al inicio">
       <img src="logo-simbolo.svg" alt="" width="32" height="32">
@@ -32,7 +32,30 @@
   </nav>
 </header>
 
-<main class="app-main container-xl">
+<!-- En el celular: barra de navegación de iOS, con flecha de volver y título -->
+<header class="ios-nav d-md-none" [class.con-fondo]="conFondo()">
+  <div class="ios-nav-lado">
+    @if (esRaiz()) {
+      <a routerLink="/inicio" class="ios-logo" aria-label="ORLO, ir al inicio"><img src="logo-simbolo.svg" alt="" width="30" height="30"></a>
+    } @else {
+      <button type="button" class="ios-volver" (click)="volver()" aria-label="Volver" id="btnVolver">
+        <i class="bi bi-chevron-left"></i><span>Atrás</span>
+      </button>
+    }
+  </div>
+  <div class="ios-nav-titulo" [class.visible]="tituloVisible()">{{ titulo() }}</div>
+  <div class="ios-nav-lado derecha">
+    <a routerLink="/cuenta" class="ios-cuenta" aria-label="Mi cuenta" id="btnCuentaMovil">
+      @if (usuario.perfil()?.photoUrl) {
+        <img [src]="usuario.perfil()!.photoUrl" alt="" class="avatar">
+      } @else {
+        <span class="avatar avatar-inicial">{{ usuario.primerNombre().charAt(0) || '·' }}</span>
+      }
+    </a>
+  </div>
+</header>
+
+<main class="app-main container-xl" [class.es-detalle]="!esRaiz()" [class.es-chat]="esChat()">
   @if (usuario.errorMe(); as error) {
     <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 mt-3" role="alert">
       <span class="flex-grow-1">{{ error }}</span>
@@ -42,12 +65,12 @@
   <router-outlet />
 </main>
 
-<!-- En el celular: barra inferior fija con las cuatro secciones -->
+<!-- En el celular: barra de pestañas de iOS -->
 <nav class="bottom-nav d-md-none" aria-label="Secciones">
-  @for (s of secciones; track s.route) {
-    <a [routerLink]="s.route" routerLinkActive="active" class="bottom-item">
-      <i class="bi {{ s.icon }}"></i>
-      <span>{{ s.label }}</span>
+  @for (p of pestanas; track p.route) {
+    <a [routerLink]="p.route" routerLinkActive="active" #rla="routerLinkActive" class="bottom-item" [attr.aria-current]="rla.isActive ? 'page' : null">
+      <i class="bi {{ rla.isActive ? p.iconActivo : p.icon }}"></i>
+      <span>{{ p.label }}</span>
     </a>
   }
 </nav>

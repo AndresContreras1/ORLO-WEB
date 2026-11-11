@@ -1,4 +1,4 @@
-<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+<div class="ios-filtros d-flex flex-wrap gap-2 align-items-center mb-3">
   <select class="form-select w-auto" [value]="categoria() ?? ''" (change)="categoria.set($any($event.target).value || null)" aria-label="Filtrar por categoría">
     <option value="">Todas las categorías</option>
     @for (c of categorias; track c.codigo) { <option [value]="c.codigo">{{ c.etiqueta }}</option> }

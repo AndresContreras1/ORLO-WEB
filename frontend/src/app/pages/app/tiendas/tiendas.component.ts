@@ -12,7 +12,7 @@ import { errorMessage } from '../../../utils/error-message';
   selector: 'app-tiendas',
   imports: [RouterLink, LoadStateComponent],
   template: `
-    <a routerLink="/explora" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Explora</a>
+    <a routerLink="/explora" class="small text-secondary text-decoration-none d-none d-md-inline"><i class="bi bi-arrow-left me-1"></i>Explora</a>
     <h1 class="h3 fw-bold mt-1 mb-1">Dónde conseguirla</h1>
     <p class="text-secondary">Algunas tiendas{{ categoria() ? ' con ' + nombreCategoria().toLowerCase() : '' }}. Antes de comprar, revisa si ya tienes algo parecido.</p>
     <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
