@@ -90,3 +90,76 @@
   justify-content: center;
   font-size: 1.25rem;
 }
+
+// Bienvenida en el celular: pantalla completa, como la primera vista de una app de iOS
+.bienvenida {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 2.5rem) 1.5rem calc(env(safe-area-inset-bottom) + .75rem);
+  background: var(--ios-surface);
+}
+
+.bienvenida-contenido {
+  flex: 1;
+  text-align: center;
+
+  h1 {
+    margin: 1.25rem 0 2rem;
+    font-size: clamp(1.4rem, 6.2vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+.bienvenida-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+  text-align: left;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  i {
+    flex: 0 0 2.5rem;
+    color: var(--ios-tint);
+    font-size: 1.875rem;
+    text-align: center;
+  }
+
+  strong {
+    display: block;
+    font-size: .9375rem;
+    font-weight: 600;
+  }
+
+  span {
+    display: block;
+    color: var(--ios-label-2);
+    font-size: .9375rem;
+    line-height: 1.25;
+  }
+}
+
+.bienvenida-acciones {
+  position: sticky;
+  bottom: 0;
+  padding-top: 1rem;
+  background: var(--ios-surface);
+}
+
+.bienvenida-legal {
+  margin: .25rem 0 0;
+  color: var(--ios-label-2);
+  font-size: .75rem;
+  text-align: center;
+
+  a {
+    color: inherit;
+  }
+}

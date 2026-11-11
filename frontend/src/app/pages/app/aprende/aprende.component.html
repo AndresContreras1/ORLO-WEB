@@ -4,7 +4,7 @@
     <p class="text-secondary mb-0">Lecciones de 3 a 5 minutos. Ábrelas en el orden que quieras y repítelas cuando quieras.</p>
   </div>
   @if (lecciones().length) {
-    <div style="min-width: 14rem;">
+    <div class="ios-avance" style="min-width: 14rem;">
       <div class="d-flex justify-content-between small mb-1"><span>Tu avance</span><strong id="avance">{{ completadas() }} de {{ lecciones().length }}</strong></div>
       <div class="progress" style="height:.5rem"><div class="progress-bar" [style.width.%]="porcentaje()"></div></div>
     </div>
@@ -13,7 +13,7 @@
 
 <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
 
-<div class="row g-3">
+<div class="row g-3 ios-lista">
   @for (l of lecciones(); track l.id) {
     <div class="col-12 col-md-6 col-xl-4">
       <a [routerLink]="bloqueada(l) ? '/premium' : ['/aprende', l.id]" class="card border-0 h-100 text-decoration-none text-body leccion-card">
@@ -39,6 +39,7 @@
             <div class="small text-secondary">{{ l.summary }}</div>
             <div class="small text-secondary mt-1"><i class="bi bi-clock me-1"></i>{{ l.minutes }} min</div>
           </div>
+          <i class="bi bi-chevron-right ios-disclosure d-md-none" aria-hidden="true"></i>
         </div>
       </a>
     </div>

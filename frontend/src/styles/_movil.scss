@@ -1,0 +1,524 @@
+// ============================================================
+// Web de usuarios en el celular: se ve como una app nativa de iOS.
+// Todo va dentro de media-breakpoint-down(md): de 768 px para arriba no cambia nada.
+// El panel de administración (/admin) no entra: solo las pantallas de $apps.
+// ============================================================
+
+:root {
+  --ios-bg: #F2F2F7;
+  --ios-surface: #FFFFFF;
+  // El acento de la marca, un poco más oscuro para que el texto blanco se lea bien
+  --ios-tint: #C4503A;
+  --ios-tint-soft: rgba(226, 114, 91, .15);
+  --ios-red: #FF3B30;
+  --ios-label: #1C1C1E;
+  --ios-label-2: rgba(60, 60, 67, .62);
+  --ios-separator: rgba(60, 60, 67, .2);
+  --ios-fill: rgba(118, 118, 128, .12);
+  --ios-bar: rgba(249, 249, 249, .86);
+  --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "DM Sans", system-ui, sans-serif;
+  // Alto de la barra inferior, sin contar la zona segura del iPhone
+  --ios-tabbar: 3.0625rem;
+}
+
+$apps: "app-user-layout, app-onboarding-layout, app-entrar, app-registro, app-landing, app-legal";
+
+@include media-breakpoint-down(md) {
+  body:has(#{$apps}) {
+    background: var(--ios-bg);
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
+  }
+
+  :is(#{$apps}) {
+    display: block;
+    font-family: var(--ios-font);
+    font-size: 1.0625rem;
+    line-height: 1.3;
+    color: var(--ios-label);
+    -webkit-tap-highlight-color: transparent;
+    --bs-secondary-color: var(--ios-label-2);
+    --bs-link-color-rgb: 196, 80, 58;
+    --bs-link-hover-color-rgb: 196, 80, 58;
+    --bs-border-color: var(--ios-separator);
+
+    a {
+      text-decoration: none;
+    }
+
+    .wordmark {
+      font-family: "DM Sans", var(--ios-font);
+    }
+
+    // Títulos con la escala de iOS: el h1 de cada pantalla es el "título grande"
+    h1.h2,
+    h1.h3 {
+      font-size: 2.125rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      line-height: 1.2;
+    }
+
+    .h3 {
+      font-size: 1.75rem;
+    }
+
+    .h4 {
+      font-size: 1.375rem;
+    }
+
+    .h5 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .h6 {
+      font-size: 1.0625rem;
+      font-weight: 600;
+    }
+
+    .small,
+    small {
+      font-size: .9375rem;
+    }
+
+    .text-secondary {
+      color: var(--ios-label-2) !important;
+    }
+
+    .text-accent {
+      color: var(--ios-tint);
+    }
+
+    // Tarjetas: blancas, sin borde ni sombra, sobre el fondo gris agrupado
+    .card {
+      --bs-card-border-radius: .75rem;
+      --bs-card-inner-border-radius: .75rem;
+      --bs-card-bg: var(--ios-surface);
+      box-shadow: none;
+    }
+
+    .card-body.p-4 {
+      padding: 1rem !important;
+    }
+
+    .badge {
+      font-weight: 600;
+    }
+
+    .alert {
+      border-radius: .75rem;
+      font-size: .9375rem;
+    }
+
+    .progress {
+      --bs-progress-bg: var(--ios-fill);
+      --bs-progress-bar-bg: var(--ios-tint);
+      height: .25rem !important;
+    }
+
+    // Botones
+    .btn {
+      --bs-btn-border-radius: .75rem;
+      --bs-btn-font-weight: 600;
+      --bs-btn-font-size: 1.0625rem;
+      --bs-btn-padding-y: .55rem;
+      min-height: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+      transition: opacity .1s linear;
+
+      &:active {
+        opacity: .55;
+      }
+    }
+
+    .btn-sm {
+      --bs-btn-border-radius: .5rem;
+      --bs-btn-font-size: .9375rem;
+      --bs-btn-padding-y: .3rem;
+      min-height: 2.125rem;
+    }
+
+    .btn-lg {
+      --bs-btn-border-radius: .875rem;
+      --bs-btn-font-size: 1.0625rem;
+      min-height: 3.125rem;
+    }
+
+    .btn-primary {
+      --bs-btn-color: #fff;
+      --bs-btn-bg: var(--ios-tint);
+      --bs-btn-border-color: var(--ios-tint);
+      --bs-btn-hover-color: #fff;
+      --bs-btn-hover-bg: var(--ios-tint);
+      --bs-btn-hover-border-color: var(--ios-tint);
+      --bs-btn-active-color: #fff;
+      --bs-btn-active-bg: var(--ios-tint);
+      --bs-btn-active-border-color: var(--ios-tint);
+      --bs-btn-disabled-color: rgba(60, 60, 67, .35);
+      --bs-btn-disabled-bg: var(--ios-fill);
+      --bs-btn-disabled-border-color: transparent;
+    }
+
+    .btn-outline-secondary,
+    .btn-light {
+      --bs-btn-color: var(--ios-tint);
+      --bs-btn-bg: var(--ios-fill);
+      --bs-btn-border-color: transparent;
+      --bs-btn-hover-color: var(--ios-tint);
+      --bs-btn-hover-bg: var(--ios-fill);
+      --bs-btn-hover-border-color: transparent;
+      --bs-btn-active-color: var(--ios-tint);
+      --bs-btn-active-bg: var(--ios-fill);
+      --bs-btn-active-border-color: transparent;
+      --bs-btn-disabled-color: rgba(60, 60, 67, .35);
+      --bs-btn-disabled-bg: var(--ios-fill);
+      --bs-btn-disabled-border-color: transparent;
+    }
+
+    .btn-link {
+      --bs-btn-color: var(--ios-tint);
+      --bs-btn-hover-color: var(--ios-tint);
+      --bs-btn-active-color: var(--ios-tint);
+      text-decoration: none;
+    }
+
+    // Campos: 17 px para que iOS no haga zoom al tocarlos
+    .form-control,
+    .form-select {
+      font-size: 1.0625rem;
+      min-height: 2.75rem;
+      border: 0;
+      border-radius: .625rem;
+      background-color: var(--ios-surface);
+
+      &:focus {
+        box-shadow: 0 0 0 2px var(--ios-tint-soft);
+      }
+
+      &.is-invalid {
+        box-shadow: 0 0 0 1px var(--ios-red);
+      }
+    }
+
+    .form-label {
+      font-size: .8125rem;
+      color: var(--ios-label-2);
+      margin: 0 0 .3rem .75rem;
+    }
+
+    .form-text {
+      font-size: .8125rem;
+      margin-left: .75rem;
+      color: var(--ios-label-2);
+    }
+
+    .form-check-input:checked {
+      background-color: var(--ios-tint);
+      border-color: var(--ios-tint);
+    }
+
+    .input-group .btn-outline-secondary {
+      --bs-btn-bg: var(--ios-surface);
+      --bs-btn-hover-bg: var(--ios-surface);
+      --bs-btn-active-bg: var(--ios-surface);
+      --bs-btn-color: var(--ios-label-2);
+      --bs-btn-hover-color: var(--ios-label-2);
+      --bs-btn-active-color: var(--ios-label-2);
+    }
+
+    // Pestañas internas (Prendas, Outfits…): control segmentado
+    .nav-pills {
+      --bs-nav-pills-border-radius: .4375rem;
+      --bs-nav-pills-link-active-bg: var(--ios-surface);
+      --bs-nav-pills-link-active-color: var(--ios-label);
+      --bs-nav-link-color: var(--ios-label);
+      --bs-nav-link-hover-color: var(--ios-label);
+      --bs-nav-link-padding-y: .3rem;
+      --bs-nav-link-padding-x: .75rem;
+      --bs-nav-link-font-size: .8125rem;
+      --bs-nav-link-font-weight: 600;
+      gap: 0 !important;
+      padding: .125rem !important;
+      background: var(--ios-fill);
+      border-radius: .5625rem;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        flex: 1 0 auto;
+      }
+
+      .nav-link {
+        width: 100%;
+        text-align: center;
+
+        &.active {
+          box-shadow: 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04);
+        }
+      }
+    }
+
+    // Lista agrupada: filas pegadas, separador fino y esquinas solo en los extremos
+    .ios-lista {
+      --bs-gutter-y: 0;
+      border-radius: .75rem;
+      overflow: hidden;
+
+      > * + * .card {
+        box-shadow: inset 0 .5px 0 var(--ios-separator);
+      }
+
+      .card {
+        --bs-card-border-radius: 0;
+        --bs-card-inner-border-radius: 0;
+      }
+    }
+
+    .row.g-4 {
+      --bs-gutter-y: 1rem;
+    }
+
+    .ios-avance {
+      width: 100%;
+    }
+
+    .ios-disclosure {
+      align-self: center;
+      color: rgba(60, 60, 67, .3);
+      font-size: .875rem;
+    }
+
+    // Botones de igual ancho
+    .ios-botones .btn {
+      flex: 1;
+    }
+
+    // Filtros en dos columnas
+    .ios-filtros {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+
+      .form-select {
+        width: 100% !important;
+        font-size: .9375rem;
+      }
+
+      .btn {
+        margin: 0 !important;
+        font-size: .9375rem;
+      }
+    }
+
+    // Acciones al final de un formulario: fijas abajo, como una barra de herramientas
+    .ios-acciones {
+      position: sticky;
+      bottom: calc(var(--ios-acciones-base, 0px) + env(safe-area-inset-bottom));
+      z-index: 5;
+      margin: 1rem -.75rem 0 !important;
+      padding: .625rem .75rem;
+      background: var(--ios-bar);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+    }
+  }
+
+  // Encima de la barra inferior cuando está visible
+  app-user-layout .ios-acciones {
+    --ios-acciones-base: var(--ios-tabbar);
+  }
+
+  // Dentro de una prenda u outfit no se repite el encabezado de Mi armario
+  .es-detalle .armario-cabecera {
+    display: none !important;
+  }
+
+  // Confirmaciones: hoja de acciones que sube desde abajo
+  :is(#{$apps}) app-confirm-dialog {
+    .modal-dialog-centered {
+      align-items: flex-end;
+      min-height: 100%;
+      margin: 0;
+      padding: .5rem .5rem calc(.5rem + env(safe-area-inset-bottom));
+    }
+
+    .modal-content {
+      background: transparent;
+      animation: ios-hoja .32s cubic-bezier(.32, .72, 0, 1);
+    }
+
+    .modal-header,
+    .modal-body {
+      justify-content: center;
+      text-align: center;
+      background: rgba(250, 250, 250, .96);
+    }
+
+    .modal-header {
+      padding: .875rem 1rem .125rem;
+      border-radius: .875rem .875rem 0 0;
+    }
+
+    .modal-title {
+      font-size: .8125rem;
+      font-weight: 600;
+      color: var(--ios-label-2);
+    }
+
+    .modal-body {
+      padding: .125rem 1rem .875rem;
+      font-size: .8125rem;
+      color: var(--ios-label-2);
+    }
+
+    .modal-footer {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: .5rem;
+      padding: 0;
+
+      .btn {
+        margin: 0;
+        width: 100%;
+        min-height: 3.5rem;
+        font-size: 1.25rem;
+        border: 0;
+      }
+
+      .btn-outline-secondary {
+        --bs-btn-bg: var(--ios-surface);
+        --bs-btn-hover-bg: var(--ios-surface);
+        --bs-btn-active-bg: var(--ios-surface);
+        border-radius: .875rem;
+      }
+
+      .btn-danger {
+        --bs-btn-color: var(--ios-red);
+        --bs-btn-bg: rgba(250, 250, 250, .96);
+        --bs-btn-hover-color: var(--ios-red);
+        --bs-btn-hover-bg: rgba(250, 250, 250, .96);
+        --bs-btn-active-color: var(--ios-red);
+        --bs-btn-active-bg: rgba(250, 250, 250, .96);
+        --bs-btn-disabled-color: var(--ios-label-2);
+        --bs-btn-disabled-bg: rgba(250, 250, 250, .96);
+        font-weight: 400;
+        border-radius: 0 0 .875rem .875rem;
+        box-shadow: inset 0 .5px 0 var(--ios-separator);
+      }
+    }
+
+    .modal-body {
+      border-radius: 0;
+    }
+  }
+
+  // Entrar y crear cuenta: pantalla completa, sin tarjeta
+  :is(app-entrar, app-registro) {
+    main.min-vh-100 {
+      align-items: flex-start !important;
+      padding: calc(env(safe-area-inset-top) + 1rem) 0 calc(env(safe-area-inset-bottom) + 1rem) !important;
+    }
+
+    .card {
+      --bs-card-bg: transparent;
+    }
+
+    .card-body {
+      padding: 1rem !important;
+    }
+
+    h1.h4 {
+      font-size: 2.125rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+  }
+
+  // Primeros pasos: encabezado centrado, respeta la zona segura
+  app-onboarding-layout header {
+    display: flex;
+    justify-content: center;
+    padding-top: calc(env(safe-area-inset-top) + .5rem) !important;
+    padding-bottom: .5rem !important;
+  }
+
+  // Transiciones entre pantallas: empujar hacia los lados, como una pila de navegación
+  ::view-transition-group(*) {
+    animation-duration: .36s;
+    animation-timing-function: cubic-bezier(.32, .72, 0, 1);
+  }
+
+  ::view-transition-old(ios-nav),
+  ::view-transition-new(ios-nav),
+  ::view-transition-old(ios-tabbar),
+  ::view-transition-new(ios-tabbar) {
+    animation: none;
+  }
+
+  html[data-transicion="igual"]::view-transition-old(root),
+  html[data-transicion="igual"]::view-transition-new(root) {
+    animation: none;
+  }
+
+  html[data-transicion="adelante"]::view-transition-old(root) {
+    animation: ios-salir-izquierda .36s cubic-bezier(.32, .72, 0, 1) both;
+  }
+
+  html[data-transicion="adelante"]::view-transition-new(root) {
+    animation: ios-entrar-derecha .36s cubic-bezier(.32, .72, 0, 1) both;
+  }
+
+  html[data-transicion="atras"]::view-transition-old(root) {
+    z-index: 1;
+    animation: ios-salir-derecha .36s cubic-bezier(.32, .72, 0, 1) both;
+  }
+
+  html[data-transicion="atras"]::view-transition-new(root) {
+    animation: ios-entrar-izquierda .36s cubic-bezier(.32, .72, 0, 1) both;
+  }
+
+  // En pantallas táctiles no hay "pasar el mouse"
+  @media (hover: none) {
+    .card:hover {
+      transform: none;
+    }
+  }
+}
+
+@keyframes ios-hoja {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ios-entrar-derecha {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ios-salir-izquierda {
+  to {
+    transform: translateX(-30%);
+    filter: brightness(.92);
+  }
+}
+
+@keyframes ios-salir-derecha {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ios-entrar-izquierda {
+  from {
+    transform: translateX(-30%);
+    filter: brightness(.92);
+  }
+}

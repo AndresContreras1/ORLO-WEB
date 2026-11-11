@@ -1,3 +1,28 @@
+<!-- En el celular: pantalla de bienvenida de app, con las acciones abajo -->
+<div class="bienvenida d-md-none">
+  <div class="bienvenida-contenido">
+    <img src="logo-simbolo.svg" alt="" width="76" height="76">
+    <h1>Cuéntanos cómo te vistes.<br>Te ayudamos con el resto.</h1>
+    <ul class="bienvenida-lista list-unstyled">
+      @for (f of features; track f.title) {
+        <li>
+          <i class="bi {{ f.icon }}"></i>
+          <div>
+            <strong>{{ f.title }}</strong>
+            <span>{{ f.corto }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+  <div class="bienvenida-acciones">
+    <a routerLink="/registro" class="btn btn-primary btn-lg w-100" id="btnEmpezarMovil">Empezar</a>
+    <a routerLink="/entrar" class="btn btn-link w-100" id="btnYaTengoCuentaMovil">Ya tengo cuenta</a>
+    <p class="bienvenida-legal"><a routerLink="/terminos">Términos</a> · <a routerLink="/privacidad">Privacidad</a></p>
+  </div>
+</div>
+
+<div class="d-none d-md-block">
 <header class="landing-nav">
   <nav class="container d-flex align-items-center justify-content-between py-3">
     <a href="#inicio" class="brand text-decoration-none d-flex align-items-center gap-2">
@@ -111,3 +136,4 @@
     </span>
   </div>
 </footer>
+</div>

@@ -4,7 +4,10 @@
 // 2. Bootstrap con esas variables
 @import "bootstrap/scss/bootstrap";
 
-// 3. Estilos globales propios (después de Bootstrap)
+// 3. Estilo de app iOS para el celular (solo por debajo de 768 px)
+@import "styles/movil";
+
+// 4. Estilos globales propios (después de Bootstrap)
 body {
   -webkit-font-smoothing: antialiased;
 }

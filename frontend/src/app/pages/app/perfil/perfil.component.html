@@ -1,7 +1,7 @@
 <div class="mx-auto" style="max-width: 46rem;">
   @if (modo() === 'editar') {
-    <a routerLink="/cuenta" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Mi cuenta</a>
-    <h1 class="h3 fw-bold mt-1">Mis preferencias</h1>
+    <a routerLink="/cuenta" class="small text-secondary text-decoration-none d-none d-md-inline"><i class="bi bi-arrow-left me-1"></i>Mi cuenta</a>
+    <h1 class="h3 fw-bold mt-1 d-none d-md-block">Mis preferencias</h1>
     <p class="text-secondary">Si cambias algo, las próximas recomendaciones lo tienen en cuenta.</p>
   } @else {
     <span class="badge bg-accent-soft text-accent mb-2">Paso 1 de 2</span>
@@ -78,7 +78,7 @@
       @if (error()) {
         <div class="alert alert-danger mb-0">{{ error() }}</div>
       }
-      <div class="d-flex justify-content-end gap-2">
+      <div class="ios-acciones ios-botones d-flex justify-content-end gap-2">
         @if (modo() === 'editar') {
           <a routerLink="/cuenta" class="btn btn-outline-secondary">Cancelar</a>
         }

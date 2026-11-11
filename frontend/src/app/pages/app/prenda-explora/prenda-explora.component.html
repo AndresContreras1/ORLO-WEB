@@ -1,5 +1,5 @@
 <app-premium-gate funcion="Explora">
-  <a routerLink="/explora" [queryParams]="{ pestana: pestana() }" class="small text-secondary text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Explora</a>
+  <a routerLink="/explora" [queryParams]="{ pestana: pestana() }" class="small text-secondary text-decoration-none d-none d-md-inline"><i class="bi bi-arrow-left me-1"></i>Explora</a>
 
   <app-load-state [loading]="cargando()" [error]="error()" (retry)="cargar()" />
 

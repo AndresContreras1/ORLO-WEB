@@ -5,6 +5,8 @@ interface Feature {
   icon: string;
   title: string;
   text: string;
+  /** Versión corta para la bienvenida en el celular. */
+  corto: string;
 }
 
 interface PlanRow {
@@ -24,10 +26,10 @@ export class LandingComponent {
   menuAbierto = signal(false);
 
   readonly features: Feature[] = [
-    { icon: 'bi-ui-checks', title: 'Descubre tu estilo', text: 'Responde unas preguntas tocando fotos. En menos de 3 minutos sabes cuál es tu estilo y qué colores te acompañan.' },
-    { icon: 'bi-journal-text', title: 'Aprende a vestirte', text: 'Lecciones cortas y visuales: cómo combinar colores, proporciones y los detalles que cambian un outfit.' },
-    { icon: 'bi-chat-heart', title: 'Pregúntale al asesor', text: '¿Qué me pongo para la universidad? El asesor te propone opciones con la ropa que ya tienes.' },
-    { icon: 'bi-grid-3x3-gap', title: 'Organiza tu armario', text: 'Guarda tus prendas y los outfits que te funcionaron para no perderlos.' },
+    { icon: 'bi-ui-checks', title: 'Descubre tu estilo', text: 'Responde unas preguntas tocando fotos. En menos de 3 minutos sabes cuál es tu estilo y qué colores te acompañan.', corto: 'Responde tocando fotos, en menos de 3 minutos.' },
+    { icon: 'bi-journal-text', title: 'Aprende a vestirte', text: 'Lecciones cortas y visuales: cómo combinar colores, proporciones y los detalles que cambian un outfit.', corto: 'Lecciones cortas y visuales.' },
+    { icon: 'bi-chat-heart', title: 'Pregúntale al asesor', text: '¿Qué me pongo para la universidad? El asesor te propone opciones con la ropa que ya tienes.', corto: 'Te propone opciones con la ropa que ya tienes.' },
+    { icon: 'bi-grid-3x3-gap', title: 'Organiza tu armario', text: 'Guarda tus prendas y los outfits que te funcionaron para no perderlos.', corto: 'Guarda tus prendas y tus outfits favoritos.' },
   ];
 
   readonly plan: PlanRow[] = [

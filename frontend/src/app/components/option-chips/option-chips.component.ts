@@ -23,6 +23,10 @@ import { Opcion } from '../../models/profile-options';
   styles: [`
     .chip { border: 1px solid var(--bs-border-color); border-radius: 50rem; background: #fff; padding: .35rem .9rem; }
     .chip-on { background: var(--bs-primary); border-color: var(--bs-primary); color: #fff; }
+    @media (max-width: 767.98px) {
+      .chip { border-color: transparent; min-height: 2.25rem; font-size: .9375rem; font-weight: 500; color: var(--ios-label); }
+      .chip-on { background: var(--ios-tint); border-color: var(--ios-tint); color: #fff; }
+    }
   `],
 })
 export class OptionChipsComponent implements ControlValueAccessor {

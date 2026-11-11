@@ -84,6 +84,86 @@
   padding-bottom: 3rem;
 }
 
+// Barra de navegación de iOS (solo celular): transparente arriba y translúcida al desplazar
+.ios-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: calc(2.75rem + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) .75rem 0;
+  border-bottom: .5px solid transparent;
+  transition: background-color .2s linear, border-color .2s linear;
+  view-transition-name: ios-nav;
+
+  &.con-fondo {
+    background: var(--ios-bar);
+    border-bottom-color: var(--ios-separator);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+}
+
+.ios-nav-lado {
+  display: flex;
+  align-items: center;
+
+  &.derecha {
+    justify-content: flex-end;
+  }
+}
+
+.ios-nav-titulo {
+  max-width: 55vw;
+  overflow: hidden;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .18s linear;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+.ios-logo {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.ios-volver {
+  display: flex;
+  align-items: center;
+  gap: .1rem;
+  min-height: 2.75rem;
+  margin-left: -.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  font-size: 1.0625rem;
+
+  i {
+    font-size: 1.3rem;
+  }
+
+  &:active {
+    opacity: .5;
+  }
+}
+
+.ios-cuenta {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+// Barra de pestañas de iOS (solo celular)
 .bottom-nav {
   position: fixed;
   left: 0;
@@ -91,9 +171,13 @@
   bottom: 0;
   z-index: 20;
   display: flex;
-  background: $orlo-surface;
-  border-top: 1px solid $orlo-border;
+  height: calc(var(--ios-tabbar) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
+  background: var(--ios-bar);
+  border-top: .5px solid var(--ios-separator);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  view-transition-name: ios-tabbar;
 }
 
 .bottom-item {
@@ -101,23 +185,31 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .1rem;
-  padding: .5rem 0 .45rem;
-  font-size: .72rem;
-  color: $orlo-muted;
+  justify-content: center;
+  gap: .05rem;
+  font-size: .625rem;
+  font-weight: 500;
+  color: rgba(60, 60, 67, .6);
   text-decoration: none;
 
   i {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    line-height: 1;
   }
 
   &.active {
-    color: darken($orlo-accent, 10%);
+    color: var(--ios-tint);
   }
 }
 
 @media (max-width: 767.98px) {
   .app-main {
-    padding-bottom: 5.5rem;
+    padding-top: .25rem;
+    padding-bottom: calc(var(--ios-tabbar) + env(safe-area-inset-bottom) + 1.5rem);
+
+    // El chat ocupa toda la pantalla, sin márgenes
+    &.es-chat {
+      padding: 0;
+    }
   }
 }
