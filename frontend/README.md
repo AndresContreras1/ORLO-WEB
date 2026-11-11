@@ -86,6 +86,11 @@ src/
 - Estado de la vista con `signal`; los datos de Firestore llegan en tiempo real (`collectionData`/`docData`) y se pasan a signals con `toSignal`.
 - Las fotos se reducen en el navegador (1280 px, JPEG) antes de subirlas a Storage.
 - Cada página muestra "Cargando…" y, si algo falla, un mensaje simple con botón **Reintentar**.
+- Registro:
+  - Contraseña de 8 a 128 caracteres con confirmación.
+  - Aviso si el dominio del correo parece mal escrito (`utils/correo.ts`: `gmil.com` → `gmail.com`), también al fallar el login.
+- Firebase Auth se inicia con `initializeAuth` sin popup ni redirect (solo correo y contraseña), así la CSP no tiene que permitir iframes ni scripts de Google.
+- En Render, `render.yaml` agrega CSP, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy`. El build no incrusta CSS crítico con `onload`, porque la CSP lo bloquearía. Si la web llama a un dominio nuevo, hay que agregarlo en `connect-src`.
 
 ## Cambiar el diseño
 

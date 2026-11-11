@@ -1,7 +1,7 @@
 rules_version = '2';
 
-// Las fotos son privadas: solo el dueño las sube, las ve y las borra. Solo imágenes de hasta 2 MB
-// (la app y la web las comprimen antes de subirlas).
+// Las fotos son privadas: solo el dueño las sube, las ve y las borra. Solo JPEG, PNG o WebP de hasta
+// 2 MB (la app y la web las comprimen a JPEG antes de subirlas). Nada de SVG, que puede llevar scripts.
 service firebase.storage {
   match /b/{bucket}/o {
 
@@ -11,7 +11,7 @@ service firebase.storage {
 
     function esImagenLiviana() {
       return request.resource.size < 2 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
     }
 
     match /garmentImages/{userId}/{fileName} {

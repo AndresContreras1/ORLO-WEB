@@ -5,6 +5,7 @@ import com.orlo.api.dto.admin.LoginResponse;
 import com.orlo.api.service.AdminAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,9 +23,13 @@ public class AdminAuthController {
         this.adminAuthService = adminAuthService;
     }
 
+    /**
+     * Detrás del proxy del hosting, getRemoteAddr ya es la IP del cliente
+     * (server.forward-headers-strategy=framework lee X-Forwarded-For).
+     */
     @PostMapping("/login")
     @Operation(summary = "Inicia sesión en el panel y devuelve un JWT")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return adminAuthService.login(request);
+    public LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return adminAuthService.login(request, httpRequest.getRemoteAddr());
     }
 }

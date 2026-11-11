@@ -124,7 +124,9 @@ export const CONTEXTOS_COMBINAR: Record<string, string> = {
   elegante: 'Elegante',
 };
 
-export const MIN_PASSWORD = 6;
+/** Firebase exige 6; la web pide 8 para que la clave no sea tan fácil de adivinar. */
+export const MIN_PASSWORD = 8;
+export const MAX_PASSWORD = 128;
 export const MAX_NOMBRE = 40;
 
 /** Etiqueta de un código, o el código si no está en la lista. */

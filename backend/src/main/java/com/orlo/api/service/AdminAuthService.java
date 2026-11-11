@@ -5,5 +5,6 @@ import com.orlo.api.dto.admin.LoginResponse;
 
 public interface AdminAuthService {
 
-    LoginResponse login(LoginRequest request);
+    /** clientIp sirve para limitar los intentos por IP. */
+    LoginResponse login(LoginRequest request, String clientIp);
 }

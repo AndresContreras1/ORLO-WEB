@@ -81,6 +81,16 @@ class AdminStyleControllerTest {
     }
 
     @Test
+    void create_javascriptImageUrl_returns400() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/styles")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID.replace("\"gallery\":[]", "\"gallery\":[\"javascript:alert(1)\"]")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION"));
+    }
+
+    @Test
     void delete_styleInUse_returns409() throws Exception {
         doThrow(new BusinessRuleException("en uso")).when(styleService).delete(3L);
 

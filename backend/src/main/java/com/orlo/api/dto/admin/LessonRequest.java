@@ -1,6 +1,8 @@
 package com.orlo.api.dto.admin;
 
+import com.orlo.api.dto.Urls;
 import com.orlo.api.dto.LessonExampleDto;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -16,7 +18,7 @@ public record LessonRequest(
         @NotBlank(message = "El consejo es obligatorio") @Size(max = 600) String tip,
         @Min(value = 1, message = "El orden empieza en 1") int order,
         @Min(value = 1, message = "Mínimo 1 minuto") @Max(value = 15, message = "Máximo 15 minutos") int minutes,
-        @Size(max = 500) String coverUrl,
+        @Size(max = 500) @Pattern(regexp = Urls.WEB_OR_EMPTY_REGEX, message = Urls.MESSAGE) String coverUrl,
         boolean freeSample,
         boolean usesColorProfile,
         boolean published,

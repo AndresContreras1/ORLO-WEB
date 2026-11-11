@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { FieldErrorComponent } from '../../../components/field-error/field-error.component';
 import { SesionService, mensajeAuth } from '../../../services/app/sesion.service';
+import { normalizarCorreo, sugerirCorreo } from '../../../utils/correo';
 
 @Component({
   selector: 'app-entrar',
@@ -31,13 +32,15 @@ export class EntrarComponent {
     }
     this.enviando.set(true);
     this.error.set(null);
+    const { email, password } = this.form.getRawValue();
     try {
-      const { email, password } = this.form.getRawValue();
-      await this.sesion.entrar(email, password);
+      await this.sesion.entrar(normalizarCorreo(email), password);
       // El guard del recorrido lleva al paso que falte (perfil o cuestionario)
       await this.router.navigate(['/inicio']);
     } catch (e) {
-      this.error.set(mensajeAuth(e));
+      // Si el dominio parece mal escrito, se avisa: la cuenta pudo crearse con ese error
+      const sugerencia = sugerirCorreo(email);
+      this.error.set(mensajeAuth(e) + (sugerencia ? ` ¿Tu correo es ${sugerencia}?` : ''));
     } finally {
       this.enviando.set(false);
     }

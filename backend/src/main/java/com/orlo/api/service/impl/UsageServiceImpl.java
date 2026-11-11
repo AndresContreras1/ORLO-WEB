@@ -44,9 +44,7 @@ public class UsageServiceImpl implements UsageService {
     @Override
     @Transactional
     public int reserve(String uid, int dailyLimit) {
-        LocalDate day = today();
-        AiUsage usage = aiUsageRepository.findForUpdate(uid, day)
-                .orElseGet(() -> aiUsageRepository.save(new AiUsage(uid, day)));
+        AiUsage usage = lockedUsage(uid, today());
         if (usage.getMessages() >= dailyLimit) {
             throw new LimitReachedException(dailyLimit);
         }
@@ -57,9 +55,7 @@ public class UsageServiceImpl implements UsageService {
     @Override
     @Transactional
     public void reserveDailyOutfit(String uid, int dailyLimit) {
-        LocalDate day = today();
-        AiUsage usage = aiUsageRepository.findForUpdate(uid, day)
-                .orElseGet(() -> aiUsageRepository.save(new AiUsage(uid, day)));
+        AiUsage usage = lockedUsage(uid, today());
         if (usage.getDailyOutfits() >= dailyLimit) {
             throw new LimitReachedException(dailyLimit);
         }
@@ -77,12 +73,19 @@ public class UsageServiceImpl implements UsageService {
     @Override
     @Transactional
     public void recordTokens(String uid, String model, long inputTokens, long outputTokens) {
-        LocalDate day = today();
-        AiUsage usage = aiUsageRepository.findForUpdate(uid, day)
-                .orElseGet(() -> aiUsageRepository.save(new AiUsage(uid, day)));
+        AiUsage usage = lockedUsage(uid, today());
         usage.setInputTokens(usage.getInputTokens() + inputTokens);
         usage.setOutputTokens(usage.getOutputTokens() + outputTokens);
         usage.setCostUsd(usage.getCostUsd().add(cost(model, inputTokens, outputTokens)));
+    }
+
+    /**
+     * Fila del día bloqueada para escribir. Primero se asegura de que exista: con findForUpdate +
+     * save, dos mensajes simultáneos del primer uso del día chocaban con la restricción única.
+     */
+    private AiUsage lockedUsage(String uid, LocalDate day) {
+        aiUsageRepository.insertIfMissing(uid, day);
+        return aiUsageRepository.findForUpdate(uid, day).orElseThrow();
     }
 
     /** Costo en USD con los precios por millón de tokens de cada familia de modelos. */

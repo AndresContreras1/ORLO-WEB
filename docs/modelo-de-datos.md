@@ -53,6 +53,23 @@ En `garments`, `outfits`, `conversations` y `messages` el id es el del documento
 
 `photoUrl` (prenda y perfil) es la URL de descarga de Storage con `&v=<milisegundos>` al final, para que una foto nueva no se muestre desde la caché.
 
+### Lo que validan las reglas
+
+Cada documento acepta **solo los campos de estas tablas**: un campo nuevo hay que agregarlo aquí y en `firestore.rules` antes de que un cliente lo escriba, o la escritura se rechaza. Los opcionales pueden faltar o venir en `null`. Fechas: `number`. Enlaces (`photoUrl`, `imageUrl`): solo `http://` o `https://`.
+
+| Documento | Topes |
+|---|---|
+| `users/{uid}` | `name` ≤ 40 (obligatorio) · cada código ≤ 40 · `occasions` ≤ 10 · `currentResult` con la forma de `Resultado` |
+| `Resultado` / `results` | `id` ≤ 128 · `Estilo`: `code` ≤ 40, `name` ≤ 80, `description` ≤ 1000, `palette` y `gallery` ≤ 20 elementos |
+| `garments` | `name` ≤ 40 · `category` de la lista · `color` ≤ 20 |
+| `outfits` | `name` ≤ 40 · `occasion` ≤ 20 · `garmentIds` e `itemsText` ≤ 30 · `why` ≤ 2000 · `origin` `asesor` o `manual` · `favorite` obligatorio |
+| `conversations` | `title` ≤ 200 |
+| `messages` | `role` `user` o `assistant` · `text` ≤ 20000 · `outfits` ≤ 10 · `followUpQuestion` ≤ 1000 |
+| `saved` | `name` ≤ 120 · `imageUrl` vacío o enlace · `category` ≤ 20 |
+| `dailyOutfits` | id `AAAA-MM-DD` · `title` ≤ 200 · `items` ≤ 20 · `why` ≤ 2000 |
+
+Las pruebas de las reglas están en [`firebase/pruebas/reglas.test.mjs`](../firebase/pruebas/reglas.test.mjs).
+
 ### Códigos de prendas
 
 | Lista | Códigos |
@@ -66,7 +83,7 @@ El backend usa los mismos códigos en el catálogo de Explora y en las tiendas (
 
 | Ruta | Quién | Notas |
 |---|---|---|
-| `garmentImages/{uid}/{garmentId}.jpg` | dueño | Foto de una prenda. Imagen de menos de 2 MB (se comprime antes de subir) |
+| `garmentImages/{uid}/{garmentId}.jpg` | dueño | Foto de una prenda. JPEG, PNG o WebP de menos de 2 MB (se comprime antes de subir). SVG no |
 | `profileImages/{uid}.jpg` | dueño | Foto de perfil |
 
 ## Cloud Functions ([`firebase/functions`](../firebase/functions/index.js))

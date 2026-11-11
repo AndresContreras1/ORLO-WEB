@@ -16,6 +16,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,15 +35,21 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /** La API solo devuelve JSON: no carga nada ni se deja incrustar en otra página. */
+    static final String API_CSP = "default-src 'none'; frame-ancestors 'none'";
+
     private final AdminJwtFilter adminJwtFilter;
     private final FirebaseTokenFilter firebaseTokenFilter;
+    private final ApiRateLimitFilter apiRateLimitFilter;
     private final JwtAuthEntryPoint authEntryPoint;
     private final ApiAccessDeniedHandler accessDeniedHandler;
 
     public SecurityConfig(AdminJwtFilter adminJwtFilter, FirebaseTokenFilter firebaseTokenFilter,
-                          JwtAuthEntryPoint authEntryPoint, ApiAccessDeniedHandler accessDeniedHandler) {
+                          ApiRateLimitFilter apiRateLimitFilter, JwtAuthEntryPoint authEntryPoint,
+                          ApiAccessDeniedHandler accessDeniedHandler) {
         this.adminJwtFilter = adminJwtFilter;
         this.firebaseTokenFilter = firebaseTokenFilter;
+        this.apiRateLimitFilter = apiRateLimitFilter;
         this.authEntryPoint = authEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -50,6 +60,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {
                 })
+                // Además de las cabeceras por defecto (nosniff, X-Frame-Options, no-store y HSTS con HTTPS).
+                // La CSP estricta va solo en /api/**: Swagger (solo en desarrollo) necesita cargar scripts.
+                .headers(h -> h
+                        .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                        .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                                PathPatternRequestMatcher.withDefaults().matcher("/api/**"),
+                                new StaticHeadersWriter("Content-Security-Policy", API_CSP))))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(authEntryPoint)
@@ -65,7 +82,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/**").hasAuthority(AppPrincipal.AUTHORITY)
                         .anyRequest().denyAll())
                 .addFilterBefore(adminJwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                // Después de identificar al usuario: el límite es por uid o por correo del panel
+                .addFilterAfter(apiRateLimitFilter, FirebaseTokenFilter.class);
         return http.build();
     }
 
@@ -96,6 +115,13 @@ public class SecurityConfig {
     @Bean
     public FilterRegistrationBean<FirebaseTokenFilter> firebaseTokenFilterRegistration(FirebaseTokenFilter filter) {
         FilterRegistrationBean<FirebaseTokenFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ApiRateLimitFilter> apiRateLimitFilterRegistration(ApiRateLimitFilter filter) {
+        FilterRegistrationBean<ApiRateLimitFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
     }

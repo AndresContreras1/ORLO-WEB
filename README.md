@@ -12,3 +12,4 @@ Backend y frontend web de ORLO, la app de asesoría de imagen personal.
 - Cómo levantar cada parte: `backend/README.md`, `frontend/README.md` y `firebase/README.md`.
 - Despliegue en Render (`render.yaml`, sin despliegue automático): [`docs/despliegue-render.md`](docs/despliegue-render.md).
 - CI en GitHub Actions: pruebas del backend y build del frontend en cada push y pull request.
+- Seguridad: protecciones, pruebas de ataque y de carga, y riesgos pendientes en [`docs/seguridad.md`](docs/seguridad.md).

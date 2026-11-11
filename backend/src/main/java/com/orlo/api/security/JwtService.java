@@ -18,6 +18,8 @@ import java.util.Optional;
 public class JwtService {
 
     private static final String ROLES_CLAIM = "roles";
+    /** Solo se aceptan los tokens que emitió esta API. */
+    static final String ISSUER = "orlo-api";
 
     private final SecretKey key;
     private final long expirationMs;
@@ -31,6 +33,7 @@ public class JwtService {
     public String generate(String email, List<String> roles) {
         Date now = new Date();
         return Jwts.builder()
+                .issuer(ISSUER)
                 .subject(email)
                 .claim(ROLES_CLAIM, roles)
                 .issuedAt(now)
@@ -39,10 +42,18 @@ public class JwtService {
                 .compact();
     }
 
-    /** Devuelve los datos del token o vacío si la firma no coincide o ya venció. */
+    /**
+     * Devuelve los datos del token o vacío si la firma no coincide, ya venció, no tiene fecha de
+     * vencimiento, no tiene correo o no lo emitió esta API.
+     */
     public Optional<AdminToken> parse(String token) {
         try {
-            Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+            Claims claims = Jwts.parser().verifyWith(key).requireIssuer(ISSUER).build()
+                    .parseSignedClaims(token).getPayload();
+            // JJWT acepta un token sin "exp"; aquí no, porque nunca vencería
+            if (claims.getExpiration() == null || claims.getSubject() == null) {
+                return Optional.empty();
+            }
             List<?> rawRoles = claims.get(ROLES_CLAIM, List.class);
             List<String> roles = rawRoles == null ? List.of() : rawRoles.stream().map(String::valueOf).toList();
             return Optional.of(new AdminToken(claims.getSubject(), roles));

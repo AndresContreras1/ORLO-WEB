@@ -41,7 +41,8 @@ Firebase real: Authentication · Firestore · Storage · Cloud Functions
 - `frontend/src/environments/environment.ts`:
   - La configuración de Firebase del paso 1.5.
   - `apiUrl`, que ya apunta a `https://orlo-api.onrender.com/api/v1`. Cámbialo si Render le pone otro nombre.
-  - El build de Render falla a propósito mientras quede algún `CAMBIAR`.
+  - El build de Render falla a propósito si el archivo contiene la palabra del marcador de ejemplo. El control lee todo el archivo, incluidos los comentarios.
+  - Si cambias el dominio de la API, cambia también `connect-src` en la cabecera `Content-Security-Policy` de `orlo-web` (en `render.yaml`): la web solo puede llamar a los dominios de esa lista.
 - Haz commit en una rama, abre el PR y mergéalo a `main`.
 
 ## 3. Crear los servicios en Render (una sola vez)
@@ -56,6 +57,8 @@ Firebase real: Authentication · Firestore · Storage · Cloud Functions
    | `ORLO_FIREBASE_PROJECT_ID` | ID del proyecto de Firebase |
 
    `ORLO_JWT_SECRET` la genera Render. La conexión a la base la toma de `orlo-db`.
+
+   Render solo pide estas tres en el formulario inicial. Si `orlo-api` no se crea al primer intento y aparece después con **Manual sync**, quedan vacías. En ese caso agrégalas a mano en *Environment*: sin ellas la API no arranca y el log dice `Could not resolve placeholder 'ORLO_…'`.
 3. En `orlo-api` → **Environment → Secret Files**, agrega un archivo:
    - Nombre: `firebase-service-account.json`.
    - Contenido: el JSON del paso 1.6.
@@ -65,6 +68,8 @@ Firebase real: Authentication · Firestore · Storage · Cloud Functions
 ## 4. Desplegar (cada vez que quieras publicar)
 
 1. Mergea a `main` las correcciones. El CI corre las pruebas del backend y el build del frontend en el PR.
+   - Si el cambio tocó `render.yaml` (cabeceras de la web, variables, planes): en **Blueprints → orlo** usa primero **Manual sync**. Con *Auto Sync* en *No*, Render no lee el archivo solo.
+   - Si tocó `firebase/firestore.rules` o `storage.rules`: corre sus pruebas (`firebase/README.md`) y publícalas con `firebase deploy --only firestore --project <id> --account <correo de la cuenta dueña>` (agrega `storage` cuando el proyecto tenga Storage).
 2. En Render, ejecuta **Manual Deploy → Deploy latest commit** en `orlo-api`. Espera a que el estado sea *Live*: el chequeo es `GET /actuator/health`.
 3. Haz lo mismo en `orlo-web`.
 4. Prueba en `https://orlo-web.onrender.com`:

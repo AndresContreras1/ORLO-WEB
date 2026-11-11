@@ -64,6 +64,21 @@ Para el proyecto real: `ORLO_SEED_DESTINO=real`, `ORLO_FIREBASE_PROJECT_ID`, `OR
 
 Así los datos quedan consistentes aunque la app o la web no alcancen a hacer todos los pasos. La función de cuenta borrada usa el disparador de Authentication de la API v1 de `firebase-functions`, porque la v2 no lo tiene.
 
+## Pruebas de las reglas
+
+Con los emuladores corriendo, desde esta carpeta:
+
+```bash
+node --test pruebas/reglas.test.mjs
+```
+
+Son 31 pruebas sin dependencias (`node:test` y `fetch`):
+- **Documentos válidos.** Los mismos que escriben la web y la app, incluidos los `null` que manda Kotlin, deben pasar.
+- **Ataques que deben fallar.** Leer o escribir datos de otro usuario, listar todos los usuarios, escribir `garmentsCount`, agregar campos inventados (`premium`), textos de cientos de KB, `javascript:` en `photoUrl`, listas enormes y mensajes con rol `system`.
+- **Storage.** Subir a la carpeta de otro, HTML o SVG disfrazados de imagen y archivos de más de 2 MB.
+
+Correrlas después de cada cambio en `firestore.rules` o `storage.rules`, y antes de publicarlas.
+
 ## Publicar en el proyecto real
 
 ```bash
